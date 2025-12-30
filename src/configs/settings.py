@@ -15,7 +15,7 @@ class Settings:
 
 
 def get_settings() -> Settings:
-    base_dir = Path(__file__).resolve().parent.parent
+    base_dir = Path(__file__).resolve().parent.parent.parent
     env_file = base_dir / ".env"
 
     load_dotenv(dotenv_path=env_file)
