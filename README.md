@@ -10,8 +10,9 @@
 
 <ins>***Dependecies*** :</ins>
 - [Python 3.10 or more](https://www.python.org/downloads/)
-- [discord.py](https://github.com/Rapptz/discord.py)
+- [discord.py==2.6.4](https://github.com/Rapptz/discord.py)
 - [python-dotenv](https://github.com/theskumar/python-dotenv)
+- aiohttp
 
 
 <ins>***File variable environments***:</ins>
