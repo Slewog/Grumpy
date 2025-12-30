@@ -16,10 +16,9 @@
 
 
 <ins>***File variable environments***:</ins>
-- ```DISCORD_TOKEN``` the tokken of your bot available on discord developper portal.
+- ```DISCORD_TOKEN``` the token of your bot available on discord developper portal.
 - ```TEST_GUILD_ID``` Your development server ID (not required).
-- ```LOG_LEVEL``` Set it to DEBUG for development (not required).
-- ```COMMAND_PREFIX``` If you want get a custom command prefix during development  (not required).
+- ```COMMAND_PREFIX``` If you want get a custom command prefix during development (not required).
 
 
 Follow the development of the bot on trello:<br/>
