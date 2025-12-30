@@ -1,0 +1,25 @@
+{
+    "material-icon-theme.files.associations": {},
+    "material-icon-theme.languages.associations": {},
+    "material-icon-theme.folders.associations": {
+        "graphics": "images",
+        "sfx": "audio",
+    },
+    "python.analysis.typeCheckingMode": "standard",
+    "python.analysis.autoFormatStrings": true,
+    "python.analysis.diagnosticSeverityOverrides": {
+        "reportOptionalMemberAccess": "information",
+        "reportArgumentType": "information"
+    },
+    "[python]": {
+        "editor.defaultFormatter": "ms-python.autopep8",
+        "editor.formatOnSave": false,
+        "editor.rulers": [
+            {"column": 150, "color": "#343333d9"},
+            {"column": 140, "color": "#023012"}
+        ]
+    },
+    "[json]": {
+        "editor.defaultFormatter": "esbenp.prettier-vscode"
+    },
+}
