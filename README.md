@@ -2,7 +2,7 @@
     <img src="assets/logo/grumpy_transparent.png" width="256px" height="256px">
 </div>
 
-***Grumpy*** is a discord bot wrote in python with discord.
+***Grumpy*** is a discord bot wrote in python with discord.py 2.6.4.
 
 <ins>***Features:***</ins>
 >- Get a role by message reaction.
