@@ -41,9 +41,6 @@ def build_logging(base_dir: Path):
     logger = logging.getLogger('BOT')
     log_lvl = get_log_level(logger.getEffectiveLevel())
 
-    log = logging.getLogger('discord.client')
-    print(log.getEffectiveLevel())
-
     if loaded:
         logger.info('Log settings loaded from data/%s', SETTING_FILE)
         logger.info("Log level is: %s", log_lvl)
