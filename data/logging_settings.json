@@ -5,7 +5,8 @@
             "format": "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
         },
         "custom": {
-            "format": "[%(asctime)s] %(levelname)s %(name)s: %(message)s"
+            "format": "%(asctime)s %(levelname)s %(name)s: %(message)s",
+            "datefmt":"%Y-%m-%d %H:%M:%S"
         }
     },
     "handlers": {
@@ -14,12 +15,12 @@
             "level": "INFO",
             "formatter": "custom"
         },
-        "file": {
+        "bot": {
             "class": "logging.FileHandler",
             "level": "INFO",
             "formatter": "custom",
             "filename": "data/logs/grumpy.log",
-            "mode": "a",
+            "mode": "w",
             "encoding": "utf-8"
         },
         "discord": {
@@ -33,32 +34,16 @@
     },
     "loggers": {
         "BOT": {
-            "level": "DEBUG",
-            "handlers": ["file", "console"],
+            "level": "INFO",
+            "handlers": ["bot", "console"],
             "propagate": false
         },
         "BOT.COGS": {
-            "level": "DEBUG",
+            "level": "INFO",
             "handlers": ["console"]
         },
         "discord": {
             "level": "INFO",
-            "handlers": ["console", "discord"]
-        },
-        "discord.http": {
-            "level": "INFO",
-            "handlers": ["console", "discord"]
-        },
-        "discord.client": {
-            "level": "INFO",
-            "handlers": ["console", "discord"]
-        },
-        "discord.state": {
-            "level": "INFO",
-            "handlers": ["console", "discord"]
-        },
-        "discord.gateway": {
-            "level": "WARNING",
             "handlers": ["discord"]
         }
     }
