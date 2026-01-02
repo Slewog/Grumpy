@@ -9,9 +9,10 @@ from dataclasses import dataclass
 class Settings:
     token: str
     base_dir: Path
-    command_prefix: str
+    invite_link: str
     test_guild_id: Optional[int]
-    log_level: str = "INFO"
+    client_id: Optional[int]
+    command_prefix: str = "!"
 
 
 def get_settings() -> Settings:
@@ -22,10 +23,21 @@ def get_settings() -> Settings:
 
     token = getenv("DISCORD_BOT_TOKEN")
     test_guild_raw = getenv("TEST_GUILD_ID")
-    command_prefix = str(getenv("COMMAND_PREFIX", "!"))
+    client_id_raw = getenv("CLIENT_ID")
+    invite_link = getenv("INVITE_LINK")
+
+    if invite_link is None or invite_link == "YOUR_BOT_INVITE_LINK_HERE":
+        raise RuntimeError("INVITE_LINK is not configured in the .env file.")
 
     if token is None or token == "YOUR_BOT_TOKEN_HERE":
         raise RuntimeError("DISCORD_BOT_TOKEN is not configured in the .env file.")
+
+    client_id = None
+    if client_id_raw:
+        try:
+            client_id = int(client_id_raw)
+        except ValueError as exc:
+            raise RuntimeError("CLIENT_ID need to be an integer in the .env file") from exc
 
     test_guild_id = None
     if test_guild_raw:
@@ -36,7 +48,8 @@ def get_settings() -> Settings:
 
     return Settings(
         token=token,
-        command_prefix=command_prefix,
         base_dir=base_dir,
+        invite_link=invite_link,
         test_guild_id=test_guild_id,
+        client_id = client_id,
     )
