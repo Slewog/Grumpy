@@ -44,7 +44,7 @@ def get_settings() -> Settings:
         try:
             test_guild_id = int(test_guild_raw)
         except ValueError as exc:
-            raise RuntimeError("TEST_GUILD_ID is not defined in the .env file") from exc
+            raise RuntimeError("TEST_GUILD_ID need to be an integer in the .env file") from exc
 
     return Settings(
         token=token,
