@@ -4,7 +4,7 @@ from pathlib import Path
 from dataclasses import dataclass
 from discord.ext import commands
 
-from src.log_service import build_logging
+from src.services.logging import build_logging
 from src.configs import Settings, get_settings, build_intents
 
 @dataclass(slots=True)
@@ -26,7 +26,6 @@ class Grumpy(commands.Bot):
         )
 
     async def setup_hook(self) -> None:
-        """Load cogs and perform setup tasks here."""
         print("Setting up bot...")
         # Load cogs here
 
@@ -40,9 +39,11 @@ def create_bot() -> GrumpyApp:
     base_dir = Path(__file__).resolve().parent.parent
     build_logging(base_dir)
     logger = logging.getLogger('BOT')
-    logger.info('Logging service is ready to use')
 
     settings = get_settings(logger=logger, base_dir=base_dir)
+
+    if settings.test_guild_id:
+        logger.info("Development server ID: %s", settings.test_guild_id)
 
     bot = Grumpy(settings=settings)
     return GrumpyApp(settings=settings, bot=bot)
