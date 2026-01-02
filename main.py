@@ -1,15 +1,17 @@
 import sys
 
+from src.bot import create_app
+
+
 def main() -> int:
     try:
-        # Your main application logic here
-        print("App creation")
+        app = create_app()
     except RuntimeError as exc:
         print(str(exc), file=sys.stderr)
         return 1
 
     try:
-        print("App would be run.")
+        app.run()
     except KeyboardInterrupt:
         return 130
 
