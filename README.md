@@ -29,7 +29,7 @@
     - ```TEST_GUILD_ID``` Your development server ID (not required).
     - ```CLIENT_ID``` Your client ID (not required).
     - ```INVITE_LINK``` The bot invitation link.
-3. Install the dependencies:
+3. Install the venv and dependencies:
     - ***Windows:*** Run ```install_grumpy.bat```
     - ***Linux:*** Run ```install_grumpy.sh```
 4. Run the bot:
