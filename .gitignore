@@ -1,2 +1,4 @@
 *.pyc
 .env
+data/logs/discord.log
+data/logs/grumpy.log
