@@ -1,5 +1,5 @@
 <div align="center">
-    <img src="assets/grumpy_transparent.png" width="256px" height="256px">
+    <img src="assets/logo/grumpy_transparent.png" width="256px" height="256px">
 </div>
 
 ***Grumpy*** is a discord bot wrote in python with discord.
