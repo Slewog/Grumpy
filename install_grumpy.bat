@@ -2,8 +2,6 @@
 set env_name=grumpy_env
 rem cd ..\
 
-
-
 @echo Creation of Grumpy Virtual Environment
 python -m venv %env_name%
 
