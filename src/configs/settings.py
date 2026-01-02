@@ -21,7 +21,7 @@ class Settings:
 
 def check_and_convert_link(raw_link: str | None, logger: Logger) -> str:
     if raw_link is None or raw_link == BOT_LINK_INVITE_DEFAULT:
-        logger.error('Unable to obtain "INVITE_LINK", please verify that it is correctly defined in the %s file', ENV_FILE_NAME)
+        logger.error("Unable to obtain 'INVITE_LINK, please verify that it is correctly defined in the %s file", ENV_FILE_NAME)
         raise RuntimeError(f"An error has been detected in the settings, the program will shut down automatically.")
 
     return raw_link
@@ -29,7 +29,7 @@ def check_and_convert_link(raw_link: str | None, logger: Logger) -> str:
 
 def check_and_convert_token(raw_token: str | None, logger: Logger) -> str:
     if raw_token is None or raw_token == BOT_TOKEN_DEFAULT:
-        logger.error('Unable to obtain "DISCORD_BOT_TOKEN", please verify that it is correctly defined in the %s file', ENV_FILE_NAME)
+        logger.error("Unable to obtain 'DISCORD_BOT_TOKEN', please verify that it is correctly defined in the %s file", ENV_FILE_NAME)
         raise RuntimeError(f"An error has been detected in the settings, the program will shut down automatically.")
 
     return raw_token
@@ -37,14 +37,14 @@ def check_and_convert_token(raw_token: str | None, logger: Logger) -> str:
 
 def convert_client_id(raw_id: str | None, logger: Logger) -> int | None:
     if raw_id is None:
-        logger.warning("Unable to obtain CLIENT_ID. Please verify that it is correctly defined in the %s file.", ENV_FILE_NAME)
+        logger.warning("Unable to obtain 'CLIENT_ID'. Please verify that it is correctly defined in the %s file.", ENV_FILE_NAME)
         return None
 
     valid_id = None
     try:
         valid_id = int(raw_id)
     except (ValueError, TypeError) as exc:
-        logger.warning("Unable to convert CLIENT_ID. Please verify that it is correctly defined in the %s file.", ENV_FILE_NAME)
+        logger.warning("Unable to convert 'CLIENT_ID'. Please verify that it is correctly defined in the %s file.", ENV_FILE_NAME)
         return None
 
     return valid_id
@@ -52,14 +52,14 @@ def convert_client_id(raw_id: str | None, logger: Logger) -> int | None:
 
 def convert_guild_id(raw_id: str | None, logger: Logger) -> int | None:
     if raw_id is None:
-        logger.warning("Unable to obtain CLIENT_ID. Please verify that it is correctly defined in the %s file.", ENV_FILE_NAME)
+        logger.warning("Unable to obtain 'TEST_GUILD_ID'. Please verify that it is correctly defined in the %s file.", ENV_FILE_NAME)
         return None
 
     valid_id = None
     try:
         valid_id = int(raw_id)
     except (ValueError, TypeError) as exc:
-        logger.warning("Unable to convert TEST_GUILD_ID. Please verify that it is correctly defined in the %s file.", ENV_FILE_NAME)
+        logger.warning("Unable to convert 'TEST_GUILD_ID'. Please verify that it is correctly defined in the %s file.", ENV_FILE_NAME)
         return None
 
     return valid_id
@@ -67,6 +67,10 @@ def convert_guild_id(raw_id: str | None, logger: Logger) -> int | None:
 
 def get_settings(logger: Logger, base_dir: Path) -> Settings:
     env_file = base_dir / ENV_FILE_NAME
+
+    if not env_file.is_file():
+        logger.error("The %s file could not be found in the bot's root directory.", ENV_FILE_NAME)
+        raise RuntimeError(f"Unable to access bot settings, the program will shut down automatically.")
 
     load_dotenv(dotenv_path=env_file, encoding="utf-8-sig")
 
@@ -84,7 +88,7 @@ def get_settings(logger: Logger, base_dir: Path) -> Settings:
 
     logger.info("Server Development ID - %s.", test_guild_id if test_guild_id is not None else "Undefined")
     logger.info("Current Client ID - %s.", client_id if client_id is not None else "Undefined")
-    logger.info('Invite link - "Defined".')
+    logger.info("Invite link - Defined.")
 
     logger.info("Settings loaded from %s with success.", ENV_FILE_NAME)
 
