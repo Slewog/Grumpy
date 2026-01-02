@@ -6,6 +6,8 @@ from dotenv import load_dotenv
 from dataclasses import dataclass
 
 ENV_FILE_NAME = ".env"
+BOT_LINK_INVITE_DEFAULT = "YOUR_BOT_INVITE_LINK_HERE"
+BOT_TOKEN_DEFAULT = "YOUR_BOT_TOKEN_HERE"
 
 @dataclass(slots=True)
 class Settings:
@@ -17,43 +19,74 @@ class Settings:
     command_prefix: str = "!"
 
 
+def check_and_convert_link(raw_link: str | None, logger: Logger) -> str:
+    if raw_link is None or raw_link == BOT_LINK_INVITE_DEFAULT:
+        logger.error('Unable to obtain "INVITE_LINK", please verify that it is correctly defined in the %s file', ENV_FILE_NAME)
+        raise RuntimeError(f"An error has been detected in the settings, the program will shut down automatically.")
+
+    return raw_link
+
+
+def check_and_convert_token(raw_token: str | None, logger: Logger) -> str:
+    if raw_token is None or raw_token == BOT_TOKEN_DEFAULT:
+        logger.error('Unable to obtain "DISCORD_BOT_TOKEN", please verify that it is correctly defined in the %s file', ENV_FILE_NAME)
+        raise RuntimeError(f"An error has been detected in the settings, the program will shut down automatically.")
+
+    return raw_token
+
+
+def convert_client_id(raw_id: str | None, logger: Logger) -> int | None:
+    if raw_id is None:
+        logger.warning("Unable to obtain CLIENT_ID. Please verify that it is correctly defined in the %s file.", ENV_FILE_NAME)
+        return None
+
+    valid_id = None
+    try:
+        valid_id = int(raw_id)
+    except (ValueError, TypeError) as exc:
+        logger.warning("Unable to convert CLIENT_ID. Please verify that it is correctly defined in the %s file.", ENV_FILE_NAME)
+        return None
+
+    return valid_id
+
+
+def convert_guild_id(raw_id: str | None, logger: Logger) -> int | None:
+    if raw_id is None:
+        logger.warning("Unable to obtain CLIENT_ID. Please verify that it is correctly defined in the %s file.", ENV_FILE_NAME)
+        return None
+
+    valid_id = None
+    try:
+        valid_id = int(raw_id)
+    except (ValueError, TypeError) as exc:
+        logger.warning("Unable to convert TEST_GUILD_ID. Please verify that it is correctly defined in the %s file.", ENV_FILE_NAME)
+        return None
+
+    return valid_id
+
+
 def get_settings(logger: Logger, base_dir: Path) -> Settings:
     env_file = base_dir / ENV_FILE_NAME
 
     load_dotenv(dotenv_path=env_file, encoding="utf-8-sig")
 
-    token = getenv("DISCORD_BOT_TOKEN")
-    test_guild_raw = getenv("TEST_GUILD_ID")
+    token_raw = getenv("DISCORD_BOT_TOKEN")
+    invite_link_raw = getenv("INVITE_LINK")
     client_id_raw = getenv("CLIENT_ID")
-    invite_link = getenv("INVITE_LINK")
+    test_guild_id_raw = getenv("TEST_GUILD_ID")
 
-    logger.info("Loading bot settings from %s", ENV_FILE_NAME)
+    logger.info("Loading settings from %s", ENV_FILE_NAME)
 
-    if invite_link is None or invite_link == "YOUR_BOT_INVITE_LINK_HERE":
-        logger.error('INVITE_LINK is not configured in the .%s file', ENV_FILE_NAME)
-        raise RuntimeError(f"INVITE_LINK is not configured in the {ENV_FILE_NAME} file.")
+    token = check_and_convert_token(token_raw, logger)
+    invite_link = check_and_convert_link(invite_link_raw, logger)
+    client_id = convert_client_id(client_id_raw, logger)
+    test_guild_id = convert_guild_id(test_guild_id_raw, logger)
 
-    if token is None or token == "YOUR_BOT_TOKEN_HERE":
-        logger.error('DISCORD_BOT_TOKEN is not configured in the %s file', ENV_FILE_NAME)
-        raise RuntimeError(f"DISCORD_BOT_TOKEN is not configured in the {ENV_FILE_NAME} file.")
+    logger.info("Server Development ID - %s.", test_guild_id if test_guild_id is not None else "Undefined")
+    logger.info("Current Client ID - %s.", client_id if client_id is not None else "Undefined")
+    logger.info('Invite link - "Defined".',)
 
-    client_id = None
-    if client_id_raw:
-        try:
-            client_id = int(client_id_raw)
-        except ValueError as exc:
-            logger.exception("CLIENT_ID is not an integer in the %s file", ENV_FILE_NAME, exc_info=exc)
-            raise RuntimeError(f"CLIENT_ID need to be an integer in the {ENV_FILE_NAME} file") from exc
-
-    test_guild_id = None
-    if test_guild_raw:
-        try:
-            test_guild_id = int(test_guild_raw)
-        except ValueError as exc:
-            logger.exception("TEST_GUILD_ID is not an integer in the %s file", ENV_FILE_NAME, exc_info=exc)
-            raise RuntimeError(f"TEST_GUILD_ID need to be an integer in the {ENV_FILE_NAME} file") from exc
-
-    logger.info("Bot settings loaded from %s with success", ENV_FILE_NAME)
+    logger.info("Settings loaded from %s with success.", ENV_FILE_NAME)
 
     return Settings(
         token=token,
