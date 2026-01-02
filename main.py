@@ -1,11 +1,11 @@
 import sys
 
-from src.bot import create_app
+from src import create_bot
 
 
 def main() -> int:
     try:
-        app = create_app()
+        app = create_bot()
     except RuntimeError as exc:
         print(str(exc), file=sys.stderr)
         return 1

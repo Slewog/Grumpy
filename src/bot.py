@@ -1,7 +1,10 @@
+import logging
+# import logging.config
+from pathlib import Path
 from dataclasses import dataclass
-
 from discord.ext import commands
 
+from src.log_service import build_logging
 from src.configs import Settings, get_settings, build_intents
 
 @dataclass(slots=True)
@@ -10,7 +13,7 @@ class GrumpyApp:
     bot: commands.Bot
 
     def run(self) -> None:
-        self.bot.run(self.settings.token)
+        self.bot.run(token=self.settings.token)
 
 
 class Grumpy(commands.Bot):
@@ -33,8 +36,13 @@ class Grumpy(commands.Bot):
         # Set commands translation here
         # Sync commands here
 
-def create_app() -> GrumpyApp:
-    settings = get_settings()
+def create_bot() -> GrumpyApp:
+    base_dir = Path(__file__).resolve().parent.parent
+    build_logging(base_dir)
+    logger = logging.getLogger('BOT')
+    logger.info('Logging service is ready to use')
+
+    settings = get_settings(logger=logger, base_dir=base_dir)
 
     bot = Grumpy(settings=settings)
     return GrumpyApp(settings=settings, bot=bot)

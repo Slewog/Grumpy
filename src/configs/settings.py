@@ -4,6 +4,8 @@ from typing import Optional
 from dotenv import load_dotenv
 from dataclasses import dataclass
 
+from logging import Logger
+
 
 @dataclass(slots=True)
 class Settings:
@@ -15,8 +17,7 @@ class Settings:
     command_prefix: str = "!"
 
 
-def get_settings() -> Settings:
-    base_dir = Path(__file__).resolve().parent.parent.parent
+def get_settings(logger: Logger, base_dir: Path) -> Settings:
     env_file = base_dir / ".env"
 
     load_dotenv(dotenv_path=env_file)
@@ -25,6 +26,8 @@ def get_settings() -> Settings:
     test_guild_raw = getenv("TEST_GUILD_ID")
     client_id_raw = getenv("CLIENT_ID")
     invite_link = getenv("INVITE_LINK")
+
+    logger.info("Loading settings from %s", env_file)
 
     if invite_link is None or invite_link == "YOUR_BOT_INVITE_LINK_HERE":
         raise RuntimeError("INVITE_LINK is not configured in the .env file.")
@@ -37,6 +40,7 @@ def get_settings() -> Settings:
         try:
             client_id = int(client_id_raw)
         except ValueError as exc:
+            logger.exception("CLIENT_ID is not an integer in the .env file", exc_info=exc)
             raise RuntimeError("CLIENT_ID need to be an integer in the .env file") from exc
 
     test_guild_id = None
@@ -44,7 +48,10 @@ def get_settings() -> Settings:
         try:
             test_guild_id = int(test_guild_raw)
         except ValueError as exc:
+            logger.exception("TEST_GUILD_ID is not an integer in the .env file", exc_info=exc)
             raise RuntimeError("TEST_GUILD_ID need to be an integer in the .env file") from exc
+
+    logger.info("Settings loaded successfully.")
 
     return Settings(
         token=token,
