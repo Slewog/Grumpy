@@ -1,5 +1,5 @@
 #!/bin/bash
-env_name="grumpy_env"
+env_name=".grumpy_env"
 
 python3 -m venv $env_name
 

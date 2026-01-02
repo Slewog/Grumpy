@@ -1,5 +1,5 @@
 @echo off
-set env_name=grumpy_env
+set env_name=.grumpy_env
 rem cd ..\
 
 @echo Creation of Grumpy Virtual Environment

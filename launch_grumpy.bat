@@ -1,5 +1,5 @@
 @echo off
-set env_name=grumpy_env
+set env_name=.grumpy_env
 rem cd ..\
 
 call .\%env_name%\Scripts\activate.bat
