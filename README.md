@@ -24,7 +24,7 @@
 
 <ins>***Installation:***</ins>
 1. Copy this folder to your machine.
-2. Complete ```.env.example``` and rename it to ```.env```..
+2. Complete ```.env.example``` and rename it to ```.env```.
     - ```DISCORD_BOT_TOKEN``` The token of your bot available on discord developper portal.
     - ```TEST_GUILD_ID``` Your development server ID (not required).
     - ```CLIENT_ID``` Your client ID (not required).
