@@ -1,5 +1,4 @@
 import logging
-# import logging.config
 from pathlib import Path
 from dataclasses import dataclass
 from discord.ext import commands
@@ -17,8 +16,9 @@ class GrumpyApp:
 
 
 class Grumpy(commands.Bot):
-    def __init__(self, *, settings: Settings) -> None:
+    def __init__(self, *, settings: Settings, logger: logging.Logger) -> None:
         intents = build_intents()
+        self._logger = logger
         super().__init__(
             command_prefix=settings.command_prefix,
             intents=intents,
@@ -38,12 +38,9 @@ class Grumpy(commands.Bot):
 def create_bot() -> GrumpyApp:
     base_dir = Path(__file__).resolve().parent.parent
     build_logging(base_dir)
-    logger = logging.getLogger('BOT')
+    logger = logging.getLogger('grumpy')
 
-    settings = get_settings(logger=logger, base_dir=base_dir)
+    settings = get_settings(logger=logging.getLogger('grumpy.settings'), base_dir=base_dir)
 
-    if settings.test_guild_id:
-        logger.info("Development server ID: %s", settings.test_guild_id)
-
-    bot = Grumpy(settings=settings)
+    bot = Grumpy(settings=settings, logger=logger)
     return GrumpyApp(settings=settings, bot=bot)
