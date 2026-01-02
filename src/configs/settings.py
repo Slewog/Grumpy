@@ -84,7 +84,7 @@ def get_settings(logger: Logger, base_dir: Path) -> Settings:
 
     logger.info("Server Development ID - %s.", test_guild_id if test_guild_id is not None else "Undefined")
     logger.info("Current Client ID - %s.", client_id if client_id is not None else "Undefined")
-    logger.info('Invite link - "Defined".',)
+    logger.info('Invite link - "Defined".')
 
     logger.info("Settings loaded from %s with success.", ENV_FILE_NAME)
 
