@@ -42,7 +42,7 @@ def convert_test_guild_id(raw_id: str | None, logger: Logger) -> int | None:
     valid_id = None
     try:
         valid_id = int(raw_id)
-    except (ValueError, TypeError) as exc:
+    except (ValueError, TypeError):
         logger.warning("Unable to convert 'TEST_GUILD_ID'. Please verify that it is correctly defined in the %s file.", ENV_FILE_NAME)
         return None
 
