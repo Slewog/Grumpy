@@ -1,5 +1,6 @@
 import json
 import logging
+import colorlog
 import logging.config
 from pathlib import Path
 
@@ -19,14 +20,16 @@ def build_logging(base_dir: Path):
     config_dict = {}
     loaded = False
 
+    if not config_path.is_file():
+        raise RuntimeError("The data/%s file does not exist", SETTING_FILE)
+
     try:
-        with config_path.open("r", encoding="utf-8-sig") as config:
-            logging.config.dictConfig(json.load(config))
+        with config_path.open("r", encoding="utf-8-sig") as fp:
+            config_dict = json.load(fp)
+        logging.config.dictConfig(config_dict)
         loaded = True
     except json.JSONDecodeError as exc:
-        raise RuntimeError(f"Failed to load log settings from from data/%s") from exc
-
-    logging.config.dictConfig(config_dict)
+        raise RuntimeError(f"Failed to load log settings from data/{SETTING_FILE}") from exc
 
     logger = logging.getLogger('grumpy.settings')
     log_lvl = LEVELS[logger.getEffectiveLevel()]
