@@ -27,9 +27,8 @@
 1. Copy this folder to your machine.
 2. Complete ```.env.example``` and rename it to ```.env```.
     - ```DISCORD_BOT_TOKEN``` The token of your bot available on discord developper portal.
-    - ```TEST_GUILD_ID``` Your development server ID (not required).
-    - ```CLIENT_ID``` Your client ID (not required).
     - ```INVITE_LINK``` The bot invitation link.
+    - ```TEST_GUILD_ID``` Your development server ID (not required).
 3. Install the venv and dependencies:
     - ***Windows:*** Run ```install_grumpy.bat```
     - ***Linux:*** Run ```install_grumpy.sh```

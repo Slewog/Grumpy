@@ -15,7 +15,6 @@ class Settings:
     base_dir: Path
     invite_link: str
     test_guild_id: Optional[int]
-    client_id: Optional[int]
     command_prefix: str = "!"
 
 
@@ -35,22 +34,7 @@ def check_and_convert_token(raw_token: str | None, logger: Logger) -> str:
     return raw_token
 
 
-def convert_client_id(raw_id: str | None, logger: Logger) -> int | None:
-    if raw_id is None:
-        logger.warning("Unable to obtain 'CLIENT_ID'. Please verify that it is correctly defined in the %s file.", ENV_FILE_NAME)
-        return None
-
-    valid_id = None
-    try:
-        valid_id = int(raw_id)
-    except (ValueError, TypeError) as exc:
-        logger.warning("Unable to convert 'CLIENT_ID'. Please verify that it is correctly defined in the %s file.", ENV_FILE_NAME)
-        return None
-
-    return valid_id
-
-
-def convert_guild_id(raw_id: str | None, logger: Logger) -> int | None:
+def convert_test_guild_id(raw_id: str | None, logger: Logger) -> int | None:
     if raw_id is None:
         logger.warning("Unable to obtain 'TEST_GUILD_ID'. Please verify that it is correctly defined in the %s file.", ENV_FILE_NAME)
         return None
@@ -76,18 +60,15 @@ def get_settings(logger: Logger, base_dir: Path) -> Settings:
 
     token_raw = getenv("DISCORD_BOT_TOKEN")
     invite_link_raw = getenv("INVITE_LINK")
-    client_id_raw = getenv("CLIENT_ID")
     test_guild_id_raw = getenv("TEST_GUILD_ID")
 
     logger.info("Loading settings from %s", ENV_FILE_NAME)
 
     token = check_and_convert_token(token_raw, logger)
     invite_link = check_and_convert_link(invite_link_raw, logger)
-    client_id = convert_client_id(client_id_raw, logger)
-    test_guild_id = convert_guild_id(test_guild_id_raw, logger)
+    test_guild_id = convert_test_guild_id(test_guild_id_raw, logger)
 
     logger.info("Server Development ID - %s.", test_guild_id if test_guild_id is not None else "Undefined")
-    logger.info("Current Client ID - %s.", client_id if client_id is not None else "Undefined")
     logger.info("Invite link - Defined.")
 
     logger.info("Settings loaded from %s with success.", ENV_FILE_NAME)
@@ -96,6 +77,5 @@ def get_settings(logger: Logger, base_dir: Path) -> Settings:
         token=token,
         base_dir=base_dir,
         invite_link=invite_link,
-        test_guild_id=test_guild_id,
-        client_id = client_id,
+        test_guild_id=test_guild_id
     )
