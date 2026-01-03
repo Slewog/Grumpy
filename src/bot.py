@@ -1,17 +1,18 @@
-import logging
-from pathlib import Path
-from dataclasses import dataclass
 import discord
+from pathlib import Path
+from logging import getLogger
+from dataclasses import dataclass
 from discord.ext import commands
 
 from src.services.logging import build_logging
 from src.configs import Settings, get_settings, build_intents
+from src.bot_cogs import register_cogs, register_commands
 
 
 class Grumpy(commands.Bot):
     def __init__(self, *, settings: Settings) -> None:
         intents = build_intents()
-        self._logger = logging.getLogger('grumpy')
+        self._logger = getLogger('grumpy')
         self.settings = settings
         super().__init__(
             command_prefix=settings.command_prefix,
@@ -21,10 +22,9 @@ class Grumpy(commands.Bot):
 
     async def setup_hook(self) -> None:
         self._logger.info("Setting up bot...")
-        # Load cogs here
+        await register_cogs(self)
 
     async def on_ready(self) -> None:
-        """Called when the bot is ready."""
         all_guilds = self.guilds
         guilds_count = len(all_guilds)
 
@@ -35,7 +35,7 @@ class Grumpy(commands.Bot):
 
         # Set commands translation here
 
-        # Sync commands here
+        await register_commands(bot=self)
 
         await self.change_presence(activity=discord.Game(name="Under development"), status=discord.Status.dnd) 
 
@@ -53,7 +53,7 @@ def create_bot() -> GrumpyApp:
     base_dir = Path(__file__).resolve().parent.parent
     build_logging(base_dir)
 
-    settings = get_settings(logger=logging.getLogger('grumpy.settings'), base_dir=base_dir)
+    settings = get_settings(logger=getLogger('grumpy.settings'), base_dir=base_dir)
 
     bot = Grumpy(settings=settings)
     return GrumpyApp(settings=settings, bot=bot)
