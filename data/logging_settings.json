@@ -25,12 +25,12 @@
     "handlers": {
         "console": {
             "class": "logging.StreamHandler",
-            "level": "INFO",
+            "level": "DEBUG",
             "formatter": "console"
         },
         "file": {
             "class": "logging.FileHandler",
-            "level": "INFO",
+            "level": "DEBUG",
             "formatter": "file",
             "filename": "data/logs/discord.log",
             "mode": "w",
@@ -45,7 +45,28 @@
         },
         "discord": {
             "level": "INFO",
-            "handlers": ["file"]
+            "handlers": ["file"],
+            "propagate": false
+        },
+        "discord.client": {
+            "level": "INFO",
+            "handlers": ["file"],
+            "propagate": false
+        },
+        "discord.http": {
+            "level": "INFO",
+            "handlers": ["file"],
+            "propagate": false
+        },
+        "discord.state": {
+            "level": "INFO",
+            "handlers": ["file"],
+            "propagate": false
+        },
+        "discord.gateway": {
+            "level": "INFO",
+            "handlers": ["file"],
+            "propagate": false
         }
     }
 }
