@@ -1,0 +1,6 @@
+{
+    "command_prefix": "!",
+    "default_local": "en",
+    "activity": "Listening !help",
+    "status": "online"
+}

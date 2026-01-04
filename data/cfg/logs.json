@@ -2,13 +2,14 @@
     "version": 1,
     "formatters": {
         "default": {
-            "format": "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+            "format": "%(asctime)s - %(name)s - %(levelname)s - %(message)s",
+            "datefmt":"%Y-%m-%d %H:%M:%S"
         },
-        "file": {
+        "discord_file": {
             "format": "%(asctime)s %(levelname)-8s %(name)s: %(message)s",
             "datefmt":"%Y-%m-%d %H:%M:%S"
         },
-        "console": {
+        "discord_stream": {
             "()": "colorlog.ColoredFormatter",
             "format": "%(light_black)s%(asctime)s%(reset)s %(log_color)s%(levelname)-8s%(reset)s %(purple)s%(name)s%(reset)s: %(message)s",
             "datefmt": "%Y-%m-%d %H:%M:%S",
@@ -23,15 +24,15 @@
         }
     },
     "handlers": {
-        "console": {
+        "console":{
             "class": "logging.StreamHandler",
             "level": "DEBUG",
-            "formatter": "console"
+            "formatter": "discord_stream"
         },
         "file": {
             "class": "logging.FileHandler",
             "level": "DEBUG",
-            "formatter": "file",
+            "formatter": "discord_file",
             "filename": "data/logs/discord.log",
             "mode": "w",
             "encoding": "utf-8"

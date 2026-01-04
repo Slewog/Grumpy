@@ -4,24 +4,23 @@ from logging import getLogger
 from dataclasses import dataclass
 from discord.ext import commands
 
-from src.services.logging import build_logging
-from src.configs import Settings, get_settings, build_intents
-from src.bot_cogs import register_cogs, register_commands
-
+from src.services import build_logging
+from src.configs import build_intents, get_settings, Settings
+from src.bot_events import register_cogs, register_commands
 
 class Grumpy(commands.Bot):
-    def __init__(self, *, settings: Settings) -> None:
-        intents = build_intents()
+    def __init__(self, settings: Settings, intents: discord.Intents) -> None:
         self._logger = getLogger('grumpy')
         self.settings = settings
+        self.is_dev_mode = self.settings.is_dev_mode
         super().__init__(
-            command_prefix=settings.command_prefix,
-            intents=intents,
+            command_prefix= commands.when_mentioned_or(settings.command_prefix),
+            intents= intents,
             # description="Grumpy Discord Bot",
         )
+        self._logger.debug("Grumpy has been initialized")
 
     async def setup_hook(self) -> None:
-        self._logger.info("Setting up bot...")
         await register_cogs(self)
 
     async def on_ready(self) -> None:
@@ -35,9 +34,25 @@ class Grumpy(commands.Bot):
 
         # Set commands translation here
 
-        await register_commands(bot=self)
+        await register_commands(self)
 
-        await self.change_presence(activity=discord.Game(name="Under development"), status=discord.Status.dnd) 
+        status = None
+        if self.settings.status == "online":
+            status = discord.Status.online
+        elif self.settings.status == "offline":
+            status = discord.Status.offline
+        elif self.settings.status == "idle":
+            status = discord.Status.idle
+        elif self.settings.status in ["dnd", "do_not_disturb"]:
+            status = discord.Status.dnd
+        elif self.settings.status == "invisible":
+            status = discord.Status.invisible
+
+        await self.change_presence(
+            activity= discord.Game(name= "Under development" if self.is_dev_mode else self.settings.activity),
+            status= discord.Status.dnd if self.is_dev_mode else status
+        )
+
 
 
 @dataclass(slots=True)
@@ -51,9 +66,10 @@ class GrumpyApp:
 
 def create_bot() -> GrumpyApp:
     base_dir = Path(__file__).resolve().parent.parent
-    build_logging(base_dir)
 
-    settings = get_settings(logger=getLogger('grumpy.settings'), base_dir=base_dir)
+    logger = build_logging(base_dir)
+    settings = get_settings(base_dir=base_dir, logger=logger)
+    intents = build_intents()
 
-    bot = Grumpy(settings=settings)
-    return GrumpyApp(settings=settings, bot=bot)
+    bot = Grumpy(settings, intents)
+    return GrumpyApp(settings= settings, bot= bot)

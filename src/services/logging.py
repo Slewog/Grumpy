@@ -4,8 +4,10 @@ import colorlog
 import logging.config
 from pathlib import Path
 
-SETTING_FILE = "logging_settings.json"
-LEVELS = {
+from src.utils import load_json_file
+
+SETTING_FILE = "data/cfg/logs.json"
+LOG_LEVELS = {
     logging.NOTSET: "NOTSET",
     logging.DEBUG: "DEBUG",
     logging.INFO: "INFO",
@@ -14,28 +16,27 @@ LEVELS = {
     logging.CRITICAL: "CRITICAL"
 }
 
+def get_log_level_name(logger: logging.Logger) -> str:
+    current_level = logger.getEffectiveLevel()
+    return LOG_LEVELS[current_level]
 
-def build_logging(base_dir: Path):
-    config_path = base_dir / "data" / SETTING_FILE
-    config_dict = {}
-    loaded = False
 
-    if not config_path.is_file():
-        raise RuntimeError("The data/%s file does not exist", SETTING_FILE)
+def build_logging(base_dir: Path) -> logging.Logger:
+    json_file = base_dir / SETTING_FILE
 
+    if not json_file.is_file():
+        raise RuntimeError(f"Unable to access the settings files in {SETTING_FILE}, the program will shut down automatically.")
+
+    config_dict = load_json_file(json_file)
     try:
-        with config_path.open("r", encoding="utf-8-sig") as fp:
-            config_dict = json.load(fp)
         logging.config.dictConfig(config_dict)
-        loaded = True
-    except json.JSONDecodeError as exc:
-        raise RuntimeError(f"Failed to load log settings from data/{SETTING_FILE}") from exc
+    except ValueError as exc:
+        raise RuntimeError(f"LOG SYSTEM ERROR: {exc}")
 
-    logger = logging.getLogger('grumpy.settings')
-    log_lvl = LEVELS[logger.getEffectiveLevel()]
+    logger = logging.getLogger("grumpy")
+    log_level = get_log_level_name(logger)
 
-    if loaded:
-        logger.info('Log settings loaded from data/%s', SETTING_FILE)
-        logger.info("Log level - %s.", log_lvl)
+    logger.info("The logging system has been successfully initialized.")
+    logger.info("Log level - %s.", log_level)
 
-    return log_lvl
+    return logger

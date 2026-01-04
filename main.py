@@ -8,6 +8,7 @@ def main() -> int:
         app = create_bot()
     except RuntimeError as exc:
         print(str(exc), file=sys.stderr)
+        input("GRUMPY - Press Enter to close the program")
         return 1
 
     try:
