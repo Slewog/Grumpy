@@ -1,17 +1,1 @@
-2026-01-04 04:09:02 INFO     grumpy: The logging system has been successfully initialized.
-2026-01-04 04:09:02 INFO     grumpy: Log level - INFO.
-2026-01-04 04:09:02 INFO     grumpy: Successfully loaded settings from 'data/cfg/grumpy.json'
-2026-01-04 04:09:02 INFO     grumpy: Successfully loaded settings from environment variables file
-2026-01-04 04:09:02 INFO     grumpy: The bot is loaded in DEVELOPMENT Mode, logging has been set to DEBUG
-2026-01-04 04:09:02 INFO     grumpy: Invite link - Defined.
-2026-01-04 04:09:02 INFO     grumpy: Server Development ID - 1443374417760620598.
-2026-01-04 04:09:02 WARNING  discord.client: PyNaCl is not installed, voice will NOT be supported
-2026-01-04 04:09:02 DEBUG    grumpy: Grumpy has been initialized
-2026-01-04 04:09:02 INFO     discord.client: logging in using static token
-2026-01-04 04:09:03 INFO     grumpy.cogs: Loading of the 2 cogs has begun.
-2026-01-04 04:09:03 INFO     grumpy.cogs.admin: Admin cog successfully loaded
-2026-01-04 04:09:03 INFO     grumpy.cogs.owner: Owner cog successfully loaded
-2026-01-04 04:09:03 INFO     discord.gateway: Shard ID None has connected to Gateway (Session ID: 853da3faebd996d10d8e704c34db7144).
-2026-01-04 04:09:05 INFO     grumpy: Sucessfully logged as Grumpy#9308 (CLIENT ID: 1456427133714039000) in 1 Guilds
-2026-01-04 04:09:05 DEBUG    grumpy: Connected on guilds 1/1 (NAME:SLG Dev Server, ID: 1443374417760620598, OWNER: slewog, OWNER ID: 221634822127353856)
-2026-01-04 04:09:05 INFO     grumpy.cogs: 2 slash commands synchronized on the server 1443374417760620598 for development
+FUTUT BOT LOG
