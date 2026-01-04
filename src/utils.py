@@ -5,9 +5,8 @@ from pathlib import Path
 
 def load_json_file(json_file: Path) -> dict[str, Any]:
     """
-    Loads the settings json file.
-
-    :param base_dir: Current directory of the bot.
+    :param json_file: Current directory of the bot.
+    :type json_file: Path
     """
     tmp_dict = {}
 

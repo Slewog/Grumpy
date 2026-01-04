@@ -12,7 +12,6 @@ SETTING_FILE = "data/cfg/grumpy.json"
 BOT_TOKEN_DEFAULT = "YOUR_BOT_TOKEN_HERE"
 BOT_TEST_GUILD_ID = "YOUR_TEST_GUILD_ID_HERE"
 BOT_LINK_INVITE_DEFAULT = "YOUR_BOT_INVITE_LINK_HERE"
-BOT_LINK_INVITE_PATTERN = "https://discord.com/oauth2/authorize"
 
 @dataclass(slots=True)
 class Settings:
@@ -62,6 +61,8 @@ def check_and_convert_link(raw_link: str, logger: Logger) -> str:
     :param logger: Bot logger system
     :type logger: Logger
     """
+    BOT_LINK_INVITE_PATTERN = "https://discord.com/oauth2/authorize"
+
     if raw_link == BOT_LINK_INVITE_DEFAULT or not BOT_LINK_INVITE_PATTERN in raw_link:
         logger.error("'INVITE_LINK' is nor set. Please verify that it is correctly defined in the %s file", ENV_FILE_NAME)
         raise RuntimeError(f"An error has been detected in the settings, the program will shut down automatically.")

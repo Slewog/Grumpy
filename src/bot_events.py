@@ -2,14 +2,14 @@ from logging import getLogger
 from sys import exit as sys_exit
 from typing import TYPE_CHECKING
 from os import listdir as os_listdir
-from discord import Object, HTTPException
+from discord import Object, HTTPException, Status, Game
 
 from src.cogs import Admin, Owner
 
 if TYPE_CHECKING:
     from src.bot import Grumpy
 
-async def register_cogs(bot: Grumpy):
+async def register_cogs(bot: Grumpy) -> None:
     logger = getLogger('grumpy.cogs')
 
     logger.info("Loading of the 2 cogs has begun.")
@@ -17,7 +17,7 @@ async def register_cogs(bot: Grumpy):
     await bot.add_cog(Owner(bot))
 
 
-async def register_commands(bot: Grumpy):
+async def register_commands(bot: Grumpy) -> None:
     """
     Sync all comands global or for developement guild.
 
@@ -38,3 +38,19 @@ async def register_commands(bot: Grumpy):
             logger.info("%s slash commands are synchronized globally (may take some time).", len(synced))
     except HTTPException as exc:
         logger.error("Command synchronization failed: %s", exc)
+
+
+async def setup_presence(bot: Grumpy) -> None:
+    BOT_VALID_STATUS = {
+        "online": Status.online,
+        "offline": Status.offline,
+        "idle": Status.idle,
+        "dnd": Status.dnd,
+        "do_not_disturb": Status.dnd,
+        "invisible": Status.invisible,
+    }
+
+    await bot.change_presence(
+        activity= Game(name= "Under development" if bot.is_dev_mode else bot.settings.activity),
+        status= Status.dnd if bot.is_dev_mode else BOT_VALID_STATUS[bot.settings.status]
+    )

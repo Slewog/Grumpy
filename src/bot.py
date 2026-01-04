@@ -6,7 +6,7 @@ from discord.ext import commands
 
 from src.services import build_logging
 from src.configs import build_intents, get_settings, Settings
-from src.bot_events import register_cogs, register_commands
+from src.bot_events import register_cogs, register_commands, setup_presence
 
 class Grumpy(commands.Bot):
     def __init__(self, settings: Settings, intents: discord.Intents) -> None:
@@ -35,24 +35,7 @@ class Grumpy(commands.Bot):
         # Set commands translation here
 
         await register_commands(self)
-
-        status = None
-        if self.settings.status == "online":
-            status = discord.Status.online
-        elif self.settings.status == "offline":
-            status = discord.Status.offline
-        elif self.settings.status == "idle":
-            status = discord.Status.idle
-        elif self.settings.status in ["dnd", "do_not_disturb"]:
-            status = discord.Status.dnd
-        elif self.settings.status == "invisible":
-            status = discord.Status.invisible
-
-        await self.change_presence(
-            activity= discord.Game(name= "Under development" if self.is_dev_mode else self.settings.activity),
-            status= discord.Status.dnd if self.is_dev_mode else status
-        )
-
+        await setup_presence(self)
 
 
 @dataclass(slots=True)
