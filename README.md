@@ -29,6 +29,7 @@
     - ```DISCORD_BOT_TOKEN``` The token of your bot available on discord developper portal.
     - ```INVITE_LINK``` The bot invitation link.
     - ```TEST_GUILD_ID``` Your development server ID (not required).
+    - ```IS_DEV``` False for production and True for development.
 3. Install the venv and dependencies:
     - ***Windows:*** Run ```install_grumpy.bat```
     - ***Linux:*** Run ```install_grumpy.sh```
