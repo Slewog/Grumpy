@@ -3,14 +3,15 @@ from pathlib import Path
 from logging import getLogger
 from dataclasses import dataclass
 from discord.ext import commands
+from logging import Logger
 
 from src.services import build_logging
 from src.configs import build_intents, get_settings, Settings
 from src.bot_events import register_cogs, register_commands, setup_presence
 
 class Grumpy(commands.Bot):
-    def __init__(self, settings: Settings, intents: discord.Intents) -> None:
-        self._logger = getLogger('grumpy')
+    def __init__(self, settings: Settings, intents: discord.Intents, logger: Logger) -> None:
+        self._logger = logger
         self.settings = settings
         self.is_dev_mode = self.settings.is_dev_mode
         super().__init__(
@@ -32,10 +33,20 @@ class Grumpy(commands.Bot):
         for idx, guild in enumerate(all_guilds, start=1):
             self._logger.debug("Connected on guilds %s/%s (NAME:%s, ID: %s, OWNER: %s, OWNER ID: %s)", idx, guilds_count, guild.name, guild.id, guild.owner, guild.owner_id)
 
-        # Set commands translation here
+        # Set translation here
 
         await register_commands(self)
         await setup_presence(self)
+
+    def log(self, message: str, level: str="INFO") -> None:
+        if level == 'INFO':
+            self._logger.info(message)
+        elif level == 'DEBUG':
+            self._logger.debug(message)
+        elif level == 'WARNING':
+            self._logger.warning(message)
+        elif level == 'ERROR':
+            self._logger.error(message)
 
 
 @dataclass(slots=True)
@@ -54,5 +65,5 @@ def create_bot() -> GrumpyApp:
     settings = get_settings(base_dir=base_dir, logger=logger)
     intents = build_intents()
 
-    bot = Grumpy(settings, intents)
+    bot = Grumpy(settings, intents, logger)
     return GrumpyApp(settings= settings, bot= bot)
