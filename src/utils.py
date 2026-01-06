@@ -1,13 +1,19 @@
 import json
-from typing import  Any
+from typing import Any
 from pathlib import Path
+from discord import Status
+
+BOT_VALID_STATUS = {
+    "online": Status.online,
+    "offline": Status.offline,
+    "idle": Status.idle,
+    "dnd": Status.dnd,
+    "do_not_disturb": Status.dnd,
+    "invisible": Status.invisible,
+}
 
 
 def load_json_file(json_file: Path) -> dict[str, Any]:
-    """
-    :param json_file: Current directory of the bot.
-    :type json_file: Path
-    """
     tmp_dict = {}
 
     try:

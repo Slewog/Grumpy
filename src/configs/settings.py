@@ -5,13 +5,14 @@ from dotenv import load_dotenv
 from logging import Logger, DEBUG
 from dataclasses import dataclass
 
-from src.utils import load_json_file
+from src.utils import load_json_file, BOT_VALID_STATUS
 
 ENV_FILE_NAME = ".env"
 SETTING_FILE = "data/cfg/grumpy.json"
 BOT_TOKEN_DEFAULT = "YOUR_BOT_TOKEN_HERE"
 BOT_TEST_GUILD_ID = "YOUR_TEST_GUILD_ID_HERE"
 BOT_LINK_INVITE_DEFAULT = "YOUR_BOT_INVITE_LINK_HERE"
+
 
 @dataclass(slots=True)
 class Settings:
@@ -27,7 +28,7 @@ class Settings:
 
 def get_settings_from_json(json_file: Path):
     if not json_file.is_file():
-        raise RuntimeError(f"Unable to access the settings files in {SETTING_FILE}, the program will shut down automatically.")
+        raise RuntimeError("Unable to access the settings files in , the program will shut down automatically.", SETTING_FILE)
 
     return load_json_file(json_file)
 
@@ -37,7 +38,7 @@ def get_env_file_path(base_dir: Path, logger: Logger) -> Path:
 
     if not env_file_path.is_file():
         logger.error("The %s file could not be found in the bot's root directory.", ENV_FILE_NAME)
-        raise RuntimeError(f"Unable to access bot settings, the program will shut down automatically.")
+        raise RuntimeError("Unable to access bot settings, the program will shut down automatically.")
 
     return env_file_path
 
@@ -46,23 +47,23 @@ def check_and_convert_link(raw_invite_link: str, logger: Logger) -> str:
     BOT_LINK_INVITE_PATTERN = "https://discord.com/oauth2/authorize"
 
     if raw_invite_link == BOT_LINK_INVITE_DEFAULT or not BOT_LINK_INVITE_PATTERN in raw_invite_link:
-        logger.error("'INVITE_LINK' is nor set. Please verify that it is correctly defined in the %s file", ENV_FILE_NAME)
-        raise RuntimeError(f"An error has been detected in the settings, the program will shut down automatically.")
+        logger.error("'INVITE_LINK' is not set. Please verify that it is correctly defined in the %s file.", ENV_FILE_NAME)
+        raise RuntimeError("An error has been detected in the settings, the program will shut down automatically.")
 
     return raw_invite_link
 
 
 def check_and_convert_token(raw_bot_token: str, logger: Logger) -> str:
     if raw_bot_token == BOT_TOKEN_DEFAULT:
-        logger.error("'DISCORD_BOT_TOKEN' is nor set and it's needed to launch the bot, please verify that it is correctly defined in the %s file", ENV_FILE_NAME)
-        raise RuntimeError(f"An error has been detected in the settings, the program will shut down automatically.")
+        logger.error("'DISCORD_BOT_TOKEN' is not set and it's needed to launch the bot, please verify that it is correctly defined in the %s file.", ENV_FILE_NAME)
+        raise RuntimeError("An error has been detected in the settings, the program will shut down automatically.")
 
     return raw_bot_token
 
 
 def convert_test_guild_id(raw_guild_id: str, logger: Logger) -> int | None:
     if raw_guild_id == BOT_TEST_GUILD_ID:
-        logger.warning("'TEST_GUILD_ID' is nor set and it's needed to sync commands to a guild on DEVELOPMENT Mode. Please verify that it is correctly defined in the %s file.", ENV_FILE_NAME)
+        logger.warning("'TEST_GUILD_ID' is not set and it's needed to sync commands to a guild on DEVELOPMENT Mode. Please verify that it is correctly defined in the %s file.", ENV_FILE_NAME)
         return None
 
     valid_id = None
@@ -76,12 +77,13 @@ def convert_test_guild_id(raw_guild_id: str, logger: Logger) -> int | None:
 
 
 def check_status(raw_status: Literal["online", "offline", "idle", "dnd", "do_not_disturb", "invisible"], logger: Logger) -> str:
-    BOT_STATUS = ["online", "offline", "idle", "dnd", "do_not_disturb", "invisible"]
+    s = str(raw_status).strip().lower()
 
-    if not raw_status in BOT_STATUS:
+    if not s in BOT_VALID_STATUS.keys():
+        logger.warning("Invalid status '%s', fallback to 'online'.", raw_status)
         return "online"
 
-    return raw_status
+    return s
 
 
 def is_development(is_dev: Literal["True", "False"]) -> bool:

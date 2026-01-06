@@ -1,25 +1,31 @@
 import discord
 from pathlib import Path
-from logging import getLogger
+from typing import Literal
+from logging import Logger
 from dataclasses import dataclass
 from discord.ext import commands
-from logging import Logger
 
-from src.services import build_logging
+from src.utils import BOT_VALID_STATUS
+from src.services import build_logging, CommandsTranslator
 from src.configs import build_intents, get_settings, Settings
-from src.bot_events import register_cogs, register_commands, setup_presence
+from src.bot_events import register_cogs, register_commands
 
 class Grumpy(commands.Bot):
     def __init__(self, settings: Settings, intents: discord.Intents, logger: Logger) -> None:
-        self._logger = logger
+        # self._logger = logger
         self.settings = settings
-        self.is_dev_mode = self.settings.is_dev_mode
+        self._logger_level_dict = {
+            "DEBUG": logger.debug,
+            "INFO": logger.info,
+            "WARNING": logger.warning,
+            "ERROR": logger.error
+        }
+
         super().__init__(
             command_prefix= commands.when_mentioned_or(settings.command_prefix),
-            intents= intents,
-            # description="Grumpy Discord Bot",
+            intents= intents
         )
-        self._logger.debug("Grumpy has been initialized")
+        self.log("Grumpy has been initialized")
 
     async def setup_hook(self) -> None:
         await register_cogs(self)
@@ -27,26 +33,32 @@ class Grumpy(commands.Bot):
     async def on_ready(self) -> None:
         all_guilds = self.guilds
         guilds_count = len(all_guilds)
+        is_development = self.is_development()
 
-        self._logger.info("Sucessfully logged as %s (CLIENT ID: %s) in %s Guilds", self.user, self.user.id, guilds_count)
+        self.log("Sucessfully logged as %s (CLIENT ID: %s) in %s Guilds", self.user, self.user.id, guilds_count)
 
-        for idx, guild in enumerate(all_guilds, start=1):
-            self._logger.debug("Connected on guilds %s/%s (NAME:%s, ID: %s, OWNER: %s, OWNER ID: %s)", idx, guilds_count, guild.name, guild.id, guild.owner, guild.owner_id)
+        if is_development:
+            for idx, guild in enumerate(all_guilds, start=1):
+                self.log("Connected on guilds %s/%s (NAME:%s, ID: %s, OWNER: %s, OWNER ID: %s)", idx, guilds_count, guild.name, guild.id, guild.owner, guild.owner_id, level="DEBUG")
 
-        # Set translation here
+        await self.tree.set_translator(CommandsTranslator())
+        self.log("Commands translations system has been loaded")
 
         await register_commands(self)
-        await setup_presence(self)
 
-    def log(self, message: str, level: str="INFO") -> None:
-        if level == 'INFO':
-            self._logger.info(message)
-        elif level == 'DEBUG':
-            self._logger.debug(message)
-        elif level == 'WARNING':
-            self._logger.warning(message)
-        elif level == 'ERROR':
-            self._logger.error(message)
+        await self.change_presence(
+            activity= discord.Game(name= "Under development" if is_development else self.settings.activity),
+            status= discord.Status.dnd if is_development else BOT_VALID_STATUS[self.settings.status]
+        )
+
+    def get_test_guild_id(self):
+        return self.settings.test_guild_id
+
+    def is_development(self) -> bool:
+        return self.settings.is_dev_mode
+
+    def log(self, message: str, *args, level: Literal["DEBUG", "INFO", "WARNING", "ERROR"]="INFO", **kwargs) -> None:
+        self._logger_level_dict[level](message, *args, **kwargs)
 
 
 @dataclass(slots=True)
