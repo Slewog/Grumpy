@@ -5,6 +5,7 @@ from os import listdir as os_listdir
 from discord import Object, HTTPException, Status, Game
 
 from src.cogs import Admin, Owner
+from src.services import CommandsTranslator
 
 if TYPE_CHECKING:
     from src.bot import Grumpy
@@ -19,13 +20,15 @@ async def register_cogs(bot: Grumpy) -> None:
 
 async def register_commands(bot: Grumpy) -> None:
     """
-    Sync all comands global or for developement guild.
-
-    :param is_dev: if set to True commands will be sync  one guild.
+    :param is_dev: if set to True commands will be sync one guild.
     """
     test_guild_id = bot.settings.test_guild_id
     logger = getLogger('grumpy.cogs')
     synced: list = []
+
+
+    await bot.tree.set_translator(CommandsTranslator())
+    bot.log("Commands translations system has been loaded")
 
     try:
         if bot.is_dev_mode and test_guild_id:

@@ -16,7 +16,7 @@ class Admin(commands.Cog, name="Admin"):
 
         self._logger.info("Admin cog successfully loaded")
 
-    @app_commands.command(name="purge", description="Purge a text channel.")
+    @app_commands.command(name="purge", description="Purge a text channel")
     @app_commands.checks.has_permissions(manage_messages=True)
     async def purge(self, interaction: discord.Interaction):
         if not isinstance(interaction.channel, discord.TextChannel):
@@ -26,9 +26,10 @@ class Admin(commands.Cog, name="Admin"):
         await interaction.response.send_message("I will purge this channel",ephemeral=True)
         await interaction.channel.purge(limit=100)
 
-    @app_commands.command(name="clear", description="Delete a number of message in a text channel.")
+    """ @app_commands.command(name="delete_message", description="Delete a number of message in a text channel.")
     @app_commands.checks.has_permissions(manage_messages=True)
-    async def clear(self, interaction: discord.Interaction, amount: int):
+    @app_commands.describe(amount="Message amount to delete")
+    async def delete_message(self, interaction: discord.Interaction, amount: int):
         if not isinstance(interaction.channel, discord.TextChannel):
             await interaction.response.send_message("This command can only be used in text channels.", ephemeral=True)
             return
@@ -41,7 +42,7 @@ class Admin(commands.Cog, name="Admin"):
             return
 
         await interaction.response.send_message(f"I will delete {total_msg_find} messages from this channel", ephemeral=True)
-        await interaction.channel.delete_messages(messages)
+        await interaction.channel.delete_messages(messages) """
 
     async def cog_command_error(self, ctx: commands.Context, error: Exception):
         print(f'An error occurred in the Admin cog !\n- Command: {ctx.invoked_with.upper()}\n- Error: {error} ({type(error)})')
