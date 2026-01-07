@@ -17,7 +17,7 @@ class CommandsTranslator(app_commands.Translator):
                 "Purge a text channel": "Purger un salon de text"
             }
         }
-    async def translate(self, string: app_commands.locale_str, locale: Locale, context: app_commands.TranslationContext):
+    async def translate(self, string: app_commands.locale_str, locale: Locale, context: app_commands.TranslationContext) -> str | None:
         """
             This method is called for each string to be translated
 

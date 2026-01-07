@@ -1,6 +1,6 @@
 from os import getenv
 from pathlib import Path
-from typing import Optional, Literal
+from typing import Optional, Literal, Any
 from dotenv import load_dotenv
 from logging import Logger, DEBUG
 from dataclasses import dataclass
@@ -26,7 +26,7 @@ class Settings:
     test_guild_id: Optional[int]
 
 
-def get_settings_from_json(json_file: Path):
+def get_settings_from_json(json_file: Path) -> dict[str, Any]:
     if not json_file.is_file():
         raise RuntimeError("Unable to access the settings files in , the program will shut down automatically.", SETTING_FILE)
 
@@ -86,7 +86,7 @@ def check_status(raw_status: Literal["online", "offline", "idle", "dnd", "do_not
     return s
 
 
-def is_development(is_dev: Literal["True", "False"]) -> bool:
+def is_development(is_dev: Literal["True", "true", "False", "false"]) -> bool:
     capitalized = is_dev.capitalize()
     if capitalized in ["True", "False"]:
         return bool(capitalized)
@@ -96,11 +96,11 @@ def is_development(is_dev: Literal["True", "False"]) -> bool:
 
 def get_settings(base_dir: Path, logger: Logger) -> Settings:
     settings_dict = get_settings_from_json(base_dir / SETTING_FILE)
-    logger.info("Successfully loaded settings from '%s'", SETTING_FILE)
+    logger.info("Successfully loaded settings from '%s'.", SETTING_FILE)
 
     env_file = get_env_file_path(base_dir, logger)
     load_dotenv(dotenv_path=env_file, encoding="utf-8-sig")
-    logger.info("Successfully loaded settings from environment variables file")
+    logger.info("Successfully loaded settings from environment variables file.")
 
     test_guild_id = None
     command_prefix: str = settings_dict.get("command_prefix", "!")
@@ -113,7 +113,7 @@ def get_settings(base_dir: Path, logger: Logger) -> Settings:
     if is_dev_mode:
         test_guild_id = convert_test_guild_id(getenv("TEST_GUILD_ID", BOT_TEST_GUILD_ID), logger)
         logger.setLevel(DEBUG)
-        logger.info("The bot is loaded in DEVELOPMENT Mode, logging has been set to DEBUG")
+        logger.info("The bot is loaded in DEVELOPMENT Mode, logging has been set to DEBUG.")
 
     logger.info("Invite link - Defined.")
     logger.info("Server Development ID - %s.", test_guild_id if test_guild_id is not None else "Undefined")
