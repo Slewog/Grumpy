@@ -2,34 +2,34 @@ from logging import getLogger
 from typing import TYPE_CHECKING
 from discord import Object, HTTPException
 
-from src.cogs import Admin, Owner
+from src.cogs import Admin, Owner, General
 
 if TYPE_CHECKING:
     from src.bot import Grumpy
 
 
 async def register_cogs(bot: Grumpy) -> None:
-    logger = getLogger('grumpy.cogs')
-
-    logger.info("Loading of the 2 cogs has begun.")
+    bot.log("Cogs loading will start, there are 3 cogs to load.")
     await bot.add_cog(Admin(bot))
     await bot.add_cog(Owner(bot))
+    await bot.add_cog(General(bot))
 
 
-async def register_commands(bot: Grumpy) -> None:
+async def synchronize_commands(bot: Grumpy) -> None:
     test_guild_id = bot.get_test_guild_id()
-    logger = getLogger('grumpy.cogs')
     synced: list = []
+
+    bot.log("Commands registration is starting.")
 
     try:
         if bot.is_development() and test_guild_id:
             guild = Object(id=test_guild_id)
             bot.tree.copy_global_to(guild=guild)
             synced = await bot.tree.sync(guild=guild)
-            logger.info("%s slash commands synchronized on the server %s for development", len(synced), test_guild_id)
+            bot.log("%s slash commands synchronized on the server %s for development.", len(synced), test_guild_id)
             return
 
         synced = await bot.tree.sync()
-        logger.info("%s slash commands are synchronized globally (may take some time).", len(synced))
+        bot.log("%s slash commands are synchronized globally (may take some time).", len(synced))
     except HTTPException as exc:
-        logger.error("Command synchronization failed: %s", exc_info=exc)
+        bot.log("Command synchronization failed: %s.", level="ERROR", exc_info=exc)
