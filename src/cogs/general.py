@@ -1,11 +1,13 @@
+from __future__ import annotations
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from src.bot import Grumpy
+
 import discord
 from logging import getLogger
 from discord.ext import commands
 from discord import app_commands
-
-from typing import TYPE_CHECKING
-if TYPE_CHECKING:
-    from src.bot import Grumpy
 
 
 class General(commands.Cog, name="General"):

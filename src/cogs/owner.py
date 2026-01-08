@@ -1,13 +1,15 @@
+from __future__ import annotations
+from typing import TYPE_CHECKING, Optional, Literal
+
+if TYPE_CHECKING:
+    from src.bot import Grumpy
+
 import discord
 from logging import getLogger
 from discord.ext import commands
 from discord import app_commands
-from typing import TYPE_CHECKING, Optional, Literal
 
 from src.utils import get_current_time
-
-if TYPE_CHECKING:
-    from src.bot import Grumpy
 
 
 async def is_owner(interaction: discord.Interaction):
