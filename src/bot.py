@@ -10,9 +10,9 @@ from src.services import build_logging, CommandsTranslator
 from src.configs import build_intents, get_settings, Settings
 from src.bot_events import register_cogs, synchronize_commands
 
+
 class Grumpy(commands.Bot):
     def __init__(self, settings: Settings, intents: discord.Intents, logger: Logger) -> None:
-        # self._logger = logger
         self.settings = settings
         self._logger_level_dict = {
             "DEBUG": logger.debug,
