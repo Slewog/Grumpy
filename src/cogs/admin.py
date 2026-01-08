@@ -1,24 +1,27 @@
+from __future__ import annotations
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from src.bot import Grumpy
+
 import discord
 from logging import getLogger
 from discord.ext import commands
 from discord import app_commands
 
-from typing import TYPE_CHECKING
-if TYPE_CHECKING:
-    from src.bot import Grumpy
 
 class Admin(commands.Cog, name="Admin"):
     """Cog for owner-only commands."""
 
     def __init__(self, bot: Grumpy) -> None:
         self.bot = bot
-        self._logger = getLogger('grumpy.cogs.admin')
+        self._logger = getLogger('grumpy.admin')
 
-        self._logger.info("Admin cog successfully loaded")
+        self._logger.debug("Admin cog successfully loaded.")
 
     @app_commands.command(name="purge", description="Purge a text channel")
     @app_commands.checks.has_permissions(manage_messages=True)
-    async def purge(self, interaction: discord.Interaction):
+    async def purge(self, interaction: discord.Interaction) -> None:
         if not isinstance(interaction.channel, discord.TextChannel):
             await interaction.response.send_message("This command can only be used in text channels.")
             return
@@ -44,7 +47,11 @@ class Admin(commands.Cog, name="Admin"):
         await interaction.response.send_message(f"I will delete {total_msg_find} messages from this channel", ephemeral=True)
         await interaction.channel.delete_messages(messages) """
 
-    async def cog_command_error(self, ctx: commands.Context, error: Exception):
+    async def cog_app_command_error(self, interaction, error: Exception) -> None:
+        cmd = interaction.command
+        print(f'An error occurred in the Admin cog !\n- Slash Command: {cmd.name}\n- Error: {error} ({type(error)})')
+
+    async def cog_command_error(self, ctx: commands.Context, error: Exception) -> None:
         print(f'An error occurred in the Admin cog !\n- Command: {ctx.invoked_with.upper()}\n- Error: {error} ({type(error)})')
 
         if isinstance(error, commands.errors.MissingPermissions):
