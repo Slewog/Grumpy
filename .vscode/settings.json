@@ -19,6 +19,7 @@
             {"column": 140, "color": "#023012"}
         ]
     },
+    "editor.autoIndentOnPaste": true,
     "[json]": {
         "editor.defaultFormatter": "esbenp.prettier-vscode"
     },
