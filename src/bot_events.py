@@ -1,11 +1,13 @@
-from logging import getLogger
+from __future__ import annotations
 from typing import TYPE_CHECKING
-from discord import Object, HTTPException
-
-from src.cogs import Admin, Owner, General
 
 if TYPE_CHECKING:
     from src.bot import Grumpy
+
+from logging import getLogger
+from discord import Object, HTTPException
+
+from src.cogs import Admin , Owner, General
 
 
 async def register_cogs(bot: Grumpy) -> None:
