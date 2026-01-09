@@ -6,7 +6,7 @@
             "datefmt":"%Y-%m-%d %H:%M:%S"
         },
         "discord_file": {
-            "format": "%(asctime)s %(levelname)-8s %(name)s: %(message)s",
+            "format": "[%(asctime)s] %(levelname)-8s %(name)s: %(message)s",
             "datefmt":"%Y-%m-%d %H:%M:%S"
         },
         "discord_stream": {
@@ -16,7 +16,7 @@
             "log_colors": {
                 "DEBUG": "cyan",
                 "INFO": "blue",
-                "WARNING": "yellow",
+                "WARNING": "bold_yellow",
                 "ERROR": "red",
                 "CRITICAL": "bold_red"
             },
@@ -45,26 +45,6 @@
             "propagate": false
         },
         "discord": {
-            "level": "INFO",
-            "handlers": ["file"],
-            "propagate": false
-        },
-        "discord.client": {
-            "level": "INFO",
-            "handlers": ["file"],
-            "propagate": false
-        },
-        "discord.http": {
-            "level": "INFO",
-            "handlers": ["file"],
-            "propagate": false
-        },
-        "discord.state": {
-            "level": "INFO",
-            "handlers": ["file"],
-            "propagate": false
-        },
-        "discord.gateway": {
             "level": "INFO",
             "handlers": ["file"],
             "propagate": false
