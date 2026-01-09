@@ -1,22 +1,27 @@
 from os import getenv
 from pathlib import Path
-from typing import Optional, Literal, Any
+from discord import Intents
 from dotenv import load_dotenv
 from logging import Logger, DEBUG
 from dataclasses import dataclass
+from typing import Optional, Literal, Any
 
-from src.utils import load_json_file, BOT_VALID_STATUS
+
+from .utils import load_json_file, BOT_VALID_STATUS
 
 ENV_FILE_NAME = ".env"
-SETTING_FILE = "data/cfg/grumpy.json"
+SETTINGS_DIR = "data/cfg"
+SETTINGS_FILE = "grumpy.json"
 BOT_TOKEN_DEFAULT = "YOUR_BOT_TOKEN_HERE"
 BOT_TEST_GUILD_ID = "YOUR_TEST_GUILD_ID_HERE"
 BOT_LINK_INVITE_DEFAULT = "YOUR_BOT_INVITE_LINK_HERE"
 
+SHUTDOWN_MSG = "The program will shutdown automatically."
+AUTO_SHUTDOWN_MSG = f"An error has been detected in the settings. {SHUTDOWN_MSG}"
+
 
 @dataclass(slots=True)
 class Settings:
-    token: str
     status: str
     activity: str
     base_dir: Path
@@ -26,9 +31,20 @@ class Settings:
     test_guild_id: Optional[int]
 
 
-def get_settings_from_json(json_file: Path) -> dict[str, Any]:
+def get_intents() -> Intents:
+    intents = Intents.default()
+    intents.message_content = True
+    intents.members = True
+    intents.reactions = True
+    intents.guilds = True
+
+    return intents
+
+
+def get_settings_from_json(json_file: Path, logger: Logger) -> dict[str, Any]:
     if not json_file.is_file():
-        raise RuntimeError("Unable to access the settings files in , the program will shut down automatically.", SETTING_FILE)
+        logger.error(f"The settings file could not be found in the bot's '{SETTINGS_DIR}' directory. {SHUTDOWN_MSG}")
+        raise FileNotFoundError(AUTO_SHUTDOWN_MSG)
 
     return load_json_file(json_file)
 
@@ -37,8 +53,8 @@ def get_env_file_path(base_dir: Path, logger: Logger) -> Path:
     env_file_path = base_dir / ENV_FILE_NAME
 
     if not env_file_path.is_file():
-        logger.error("The %s file could not be found in the bot's root directory.", ENV_FILE_NAME)
-        raise RuntimeError("Unable to access bot settings, the program will shut down automatically.")
+        logger.error(f"The environment variables file could not be found in the bot's root directory. {SHUTDOWN_MSG}")
+        raise FileNotFoundError(AUTO_SHUTDOWN_MSG)
 
     return env_file_path
 
@@ -47,30 +63,30 @@ def check_and_convert_link(raw_invite_link: str, logger: Logger) -> str:
     BOT_LINK_INVITE_PATTERN = "https://discord.com/oauth2/authorize"
 
     if raw_invite_link == BOT_LINK_INVITE_DEFAULT or not BOT_LINK_INVITE_PATTERN in raw_invite_link:
-        logger.error("'INVITE_LINK' is not set. Please verify that it is correctly defined in the %s file.", ENV_FILE_NAME)
-        raise RuntimeError("An error has been detected in the settings, the program will shut down automatically.")
+        logger.error(f"'INVITE_LINK' is not set. Please verify that it is correctly defined in the {ENV_FILE_NAME} file.")
+        raise ValueError(AUTO_SHUTDOWN_MSG)
 
     return raw_invite_link
 
 
 def check_and_convert_token(raw_bot_token: str, logger: Logger) -> str:
     if raw_bot_token == BOT_TOKEN_DEFAULT:
-        logger.error("'DISCORD_BOT_TOKEN' is not set and it's needed to launch the bot, please verify that it is correctly defined in the %s file.", ENV_FILE_NAME)
-        raise RuntimeError("An error has been detected in the settings, the program will shut down automatically.")
+        logger.error(f"'DISCORD_BOT_TOKEN' is not set and it's needed to launch the bot, please verify that it is correctly defined in the {ENV_FILE_NAME} file.")
+        raise ValueError(AUTO_SHUTDOWN_MSG)
 
     return raw_bot_token
 
 
 def convert_test_guild_id(raw_guild_id: str, logger: Logger) -> int | None:
     if raw_guild_id == BOT_TEST_GUILD_ID:
-        logger.warning("'TEST_GUILD_ID' is not set and it's needed to sync commands to a guild on DEVELOPMENT Mode. Please verify that it is correctly defined in the %s file.", ENV_FILE_NAME)
+        logger.warning(f"'TEST_GUILD_ID' is not set and it's needed to sync commands to a guild on DEVELOPMENT Mode. Please verify that it is correctly defined in the {ENV_FILE_NAME} file.")
         return None
 
     valid_id = None
     try:
         valid_id = int(raw_guild_id)
     except (ValueError, TypeError):
-        logger.warning("Unable to convert 'TEST_GUILD_ID' it's needed to sync commands to a guild on DEVELOPMENT Mode. Please verify that it is correctly defined in the %s file.", ENV_FILE_NAME)
+        logger.warning(f"Unable to convert 'TEST_GUILD_ID' it's needed to sync commands to a guild on DEVELOPMENT Mode. Please verify that it is correctly defined in the {ENV_FILE_NAME} file.")
         return None
 
     return valid_id
@@ -80,7 +96,7 @@ def check_status(raw_status: Literal["online", "offline", "idle", "dnd", "do_not
     s = str(raw_status).strip().lower()
 
     if not s in BOT_VALID_STATUS.keys():
-        logger.warning("Invalid status '%s', fallback to 'online'.", raw_status)
+        logger.warning(f"Invalid status '{raw_status}', fallback to 'online'.")
         return "online"
 
     return s
@@ -94,13 +110,12 @@ def is_development(is_dev: Literal["True", "true", "False", "false"]) -> bool:
     return False
 
 
-def get_settings(base_dir: Path, logger: Logger) -> Settings:
-    settings_dict = get_settings_from_json(base_dir / SETTING_FILE)
-    logger.info("Successfully loaded settings from '%s'.", SETTING_FILE)
+def get_settings(base_dir: Path, logger: Logger):
+    settings_dict = get_settings_from_json(base_dir / SETTINGS_DIR / SETTINGS_FILE, logger)
 
     env_file = get_env_file_path(base_dir, logger)
     load_dotenv(dotenv_path=env_file, encoding="utf-8-sig")
-    logger.info("Successfully loaded settings from environment variables file.")
+    logger.info(f"Successfully loaded settings from environment variables file and from '{SETTINGS_DIR}/{SETTINGS_FILE}'.")
 
     test_guild_id = None
     command_prefix: str = settings_dict.get("command_prefix", "!")
@@ -113,13 +128,8 @@ def get_settings(base_dir: Path, logger: Logger) -> Settings:
     if is_dev_mode:
         test_guild_id = convert_test_guild_id(getenv("TEST_GUILD_ID", BOT_TEST_GUILD_ID), logger)
         logger.setLevel(DEBUG)
-        logger.info("The bot is loaded in DEVELOPMENT Mode, logging has been set to DEBUG.")
 
-    logger.info("Invite link - Defined.")
-    logger.info("Server Development ID - %s.", test_guild_id if test_guild_id is not None else "Undefined")
-
-    return Settings(
-        token = token,
+    return token, Settings(
         is_dev_mode = is_dev_mode,
         base_dir = base_dir,
         invite_link = invite_link,

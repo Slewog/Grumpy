@@ -2,38 +2,20 @@ from __future__ import annotations
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from src.bot import Grumpy
+    from ..bot import Grumpy
 
 import discord
-from logging import getLogger
 from discord.ext import commands
-from discord import app_commands
 
 
-class General(commands.Cog, name="General"):
-    """Cog for owner-only commands."""
-
+class General(commands.Cog, name="general"):
     def __init__(self, bot: Grumpy) -> None:
         self.bot = bot
-        self._logger = getLogger('grumpy.general')
 
-        self._logger.debug("General cog successfully loaded.")
+    @commands.command(name="say")
+    async def say(self, ctx: commands.Context, amount: int):
+        print(amount)
 
-    @app_commands.command(name="ping", description="Check if the bot is alive.")
-    async def ping(self, interaction: discord.Interaction) -> None:
-        if not isinstance(interaction.channel, discord.TextChannel):
-            await interaction.response.send_message("This command can only be used in text channels.")
-            return
 
-        embed = discord.Embed(
-            title="🏓 Pong!",
-            description=f"The bot latency is {round(self.bot.latency * 1000)}ms.",
-            color=discord.Color.purple(),
-        )
-
-        await interaction.response.send_message(embed=embed)
-    async def cog_app_command_error(self, interaction: discord.Interaction, error: Exception) -> None:
-        await interaction.response.send_message( f"An error occurred in the General COG: {error}.", ephemeral=True )
-        print(error)
-        """ if isinstance(error, commands.errors.NotOwner):
-            pass """
+async def setup(bot: Grumpy) -> None:
+    await bot.add_cog(General(bot))
