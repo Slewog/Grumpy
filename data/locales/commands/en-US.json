@@ -1,0 +1,6 @@
+{
+    "grab_id": "Get user id",
+    "ping_description": "Check bot latency",
+    "help_description": "List of available commands",
+    "sync_description":"Synchronizes the slash commands"
+}
