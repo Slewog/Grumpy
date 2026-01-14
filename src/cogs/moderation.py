@@ -17,9 +17,9 @@ class Moderation(commands.Cog, name="moderation"):
 
     async def _can_perform_in_channel(self, interaction: discord.Interaction, channel_type: str) -> bool:
         can_perform = True
-        if channel_type == "text" and not isinstance(interaction.channel, discord.TextChannel):
-            await interaction.response.send_message("This command can only be used in text channels.", ephemeral=True, delete_after=DELETE_AFTER)
-            can_perform = False
+        if channel_type == "text" and not isinstance(interaction.channel, (discord.TextChannel, discord.Thread)):
+                await interaction.response.send_message("This command can only be used in text channels or forums.", ephemeral=True, delete_after=DELETE_AFTER)
+                can_perform = False
 
         return can_perform
 
@@ -30,7 +30,7 @@ class Moderation(commands.Cog, name="moderation"):
         if not await self._can_perform_in_channel(interaction, "text"):
             return
 
-        assert isinstance(interaction.channel, discord.TextChannel)
+        assert isinstance(interaction.channel, (discord.Thread, discord.TextChannel))
 
         await interaction.response.send_message("I will purge this channel", ephemeral=True, delete_after=DELETE_AFTER)
         await interaction.channel.purge(limit=100)
@@ -44,7 +44,7 @@ class Moderation(commands.Cog, name="moderation"):
         if not await self._can_perform_in_channel(interaction, "text"):
             return
 
-        assert isinstance(interaction.channel, discord.TextChannel)
+        assert isinstance(interaction.channel, (discord.Thread, discord.TextChannel))
 
         messages = [message async for message in interaction.channel.history(limit=amount if amount <= 100 else 100)]
         total_msg_find = len(messages)
