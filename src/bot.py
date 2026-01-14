@@ -3,6 +3,7 @@ from pathlib import Path
 from logging import Logger
 from os import name as os_name
 from dataclasses import dataclass
+from typing import Any
 
 import discord
 from discord.ext import commands
@@ -66,7 +67,7 @@ class Grumpy(commands.Bot):
         self.logger.info(f"{self.user.name} is ready to use.")
 
     async def on_disconnect(self) -> None:
-        self.logger.warning("The bot disconnects following a request from its owner.")
+        self.logger.warning("The bot disconnects following a request from its owner or an error that occurred during loading.")
 
     async def on_guild_join(self, guild: discord.Guild) -> None:
         print(f'Joined guild: {guild.name} (ID: {guild.id})')
@@ -82,6 +83,13 @@ class Grumpy(commands.Bot):
 
     async def on_raw_member_remove(self, payload: discord.RawMemberRemoveEvent):
         pass
+
+    async def on_error(self, event_method: str, /, *args: Any, **kwargs: Any) -> None:
+        await super().on_error(event_method, *args, **kwargs)
+
+        if event_method == "on_ready":
+            await self.change_presence(status=discord.Status.offline)
+            await self.close()
 
 
 @dataclass(slots=True)

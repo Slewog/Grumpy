@@ -1,8 +1,9 @@
 from discord import app_commands, Locale
-from logging import getLogger
 from pathlib import Path
 
 from ..utils import load_json_file
+
+CMD_LOCALES_DIR = "data/locales/commands"
 
 
 class CommandsTranslator(app_commands.Translator):
@@ -37,8 +38,15 @@ class CommandsTranslator(app_commands.Translator):
         This is invoked when :meth:`CommandTree.set_translator` is called.
         """
 
-        translations_dir = Path(__file__).resolve().parent.parent.parent / "data/locales/commands"
+        translations_dir = Path(__file__).resolve().parent.parent.parent / CMD_LOCALES_DIR
+
+        if not translations_dir.exists():
+            raise FileNotFoundError("Unable to find the folder containing the command translations")
+
         translations_files = [file.name[:-5] for file in translations_dir.glob('*.json')]
+
+        if len(translations_files) == 0 or "en-US" not in translations_files:
+            raise FileNotFoundError(f"Unable to locate the en-US.json file in the '{CMD_LOCALES_DIR}' folder")
 
         for locale in Locale:
             if locale.value in translations_files:
