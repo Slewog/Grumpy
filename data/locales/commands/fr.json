@@ -1,5 +1,10 @@
 {
     "grab_id": "Obtenir l'identifiant",
-    "help_description": "Liste des commandes disponible",
-    "ping_description": "Vérifier la latence du bot"
+    "report_message": "Signaler aux modérateurs",
+    "ping_desc": "Vérifier la latence du bot",
+    "help_desc": "Liste des commandes disponible",
+    "purge_desc": "Nettoyer un salon de texte",
+    "del_msg_desc": "Supprimer des messages dans un salon de texte",
+    "del_msg_amount_desc": "Nombre de message à supprimer",
+    "del_msg_amount": "nombre"
 }
