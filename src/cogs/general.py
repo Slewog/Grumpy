@@ -14,9 +14,10 @@ from ..utils import get_current_time
 class General(commands.Cog, name="general"):
     def __init__(self, bot: Grumpy) -> None:
         self.bot = bot
-        """ self.context_menu_user = app_commands.ContextMenu(
-            name=app_commands.locale_str("grab_id"), callback=self.grab_id
-        ) """
+
+        self.build_context_menu()
+
+    def build_context_menu(self):
         self.bot.tree.add_command(
             app_commands.ContextMenu(
                 name=app_commands.locale_str("grab_id"), callback=self.grab_id
@@ -49,7 +50,7 @@ class General(commands.Cog, name="general"):
     @app_commands.command(name="ping", description=app_commands.locale_str("ping_desc"))
     @app_commands.guild_only()
     async def ping(self, interaction: discord.Interaction) -> None:
-        if not isinstance(interaction.channel, discord.TextChannel):
+        if not isinstance(interaction.channel, (discord.Thread, discord.TextChannel)):
             await interaction.response.send_message("This command can only be used in text channels.")
             return
 
