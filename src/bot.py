@@ -7,24 +7,39 @@ from dataclasses import dataclass
 import discord
 from discord.ext import commands
 
-from .services.logger import build_logger, get_log_level_name
-from .settings import get_intents, get_settings, Settings, SHUTDOWN_MSG
-from .bot_events import load_cogs, synchronize_commands
 from .utils import BOT_VALID_STATUS
+from .settings import get_settings, Settings
+from .services.commands_translator import CommandsTranslator
+from .services.logger import build_logger, get_log_level_name
+from .bot_events import load_cogs, synchronize_slash_commands
 
 
 class Grumpy(commands.Bot):
     def __init__(self, logger: Logger, settings: Settings) -> None:
-        super().__init__(
-            command_prefix= commands.when_mentioned_or(settings.command_prefix),
-            intents= get_intents()
-        )
+        intents = discord.Intents.default()
+        intents.message_content = True
+        intents.members = True
 
         self.settings = settings
         self.logger = logger
 
+        super().__init__(
+            command_prefix = commands.when_mentioned_or(settings.command_prefix),
+            intents = intents,
+            help_command = None
+        )
+
     def is_development(self) -> bool:
         return self.settings.is_dev_mode
+
+    async def get_command_translation(self, locale_str: str, user_locale: discord.Locale) -> str:
+        translation = await self.tree.translator.translate(
+            discord.app_commands.locale_str(locale_str),
+            user_locale,
+            None
+        )
+
+        return translation.partition("\n")[0] if translation is not None else locale_str.partition("\n")[0]
 
     async def setup_hook(self) -> None:
         await load_cogs(self)
@@ -35,18 +50,38 @@ class Grumpy(commands.Bot):
 
         self.logger.info(f"Successfully logged in as {self.user} in {len(self.guilds)} guilds")
 
-        # await self.tree.set_translator(CommandsTranslator())
-        # self.logger.info("Commands translations system has been loaded.")
-
-        await synchronize_commands(self)
+        await self.tree.set_translator(CommandsTranslator())
+        self.logger.info("The slash command translation service has been successfully loaded.")
 
         is_development = self.is_development()
+
+        if is_development:
+            await synchronize_slash_commands(self)
+
         await self.change_presence(
             activity= discord.Game(name= "Under development" if is_development else self.settings.activity),
             status= discord.Status.dnd if is_development else BOT_VALID_STATUS[self.settings.status]
         )
 
         self.logger.info(f"{self.user.name} is ready to use.")
+
+    async def on_disconnect(self) -> None:
+        self.logger.warning("The bot disconnects following a request from its owner.")
+
+    async def on_guild_join(self, guild: discord.Guild) -> None:
+        print(f'Joined guild: {guild.name} (ID: {guild.id})')
+
+    async def on_guild_remove(self, guild: discord.Guild) -> None:
+        print(f'Removed from guild: {guild.name} (ID: {guild.id})')
+
+    async def on_member_join(self, member: discord.Member) -> None:
+        print(f"{member.display_name} as joined {member.guild.name}")
+
+    async def on_member_remove(self, member: discord.Member) -> None:
+        print(f"{member.display_name} as leaved {member.guild.name}")
+
+    async def on_raw_member_remove(self, payload: discord.RawMemberRemoveEvent):
+        pass
 
 
 @dataclass(slots=True)

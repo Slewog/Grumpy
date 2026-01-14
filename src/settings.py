@@ -18,6 +18,7 @@ BOT_LINK_INVITE_DEFAULT = "YOUR_BOT_INVITE_LINK_HERE"
 
 SHUTDOWN_MSG = "The program will shutdown automatically."
 AUTO_SHUTDOWN_MSG = f"An error has been detected in the settings. {SHUTDOWN_MSG}"
+VERIFY_MSG = f"Please verify that it is correctly defined in the {ENV_FILE_NAME} file."
 
 
 @dataclass(slots=True)
@@ -29,16 +30,6 @@ class Settings:
     is_dev_mode: bool
     command_prefix: str
     test_guild_id: Optional[int]
-
-
-def get_intents() -> Intents:
-    intents = Intents.default()
-    intents.message_content = True
-    intents.members = True
-    intents.reactions = True
-    intents.guilds = True
-
-    return intents
 
 
 def get_settings_from_json(json_file: Path, logger: Logger) -> dict[str, Any]:
@@ -63,7 +54,7 @@ def check_and_convert_link(raw_invite_link: str, logger: Logger) -> str:
     BOT_LINK_INVITE_PATTERN = "https://discord.com/oauth2/authorize"
 
     if raw_invite_link == BOT_LINK_INVITE_DEFAULT or not BOT_LINK_INVITE_PATTERN in raw_invite_link:
-        logger.error(f"'INVITE_LINK' is not set. Please verify that it is correctly defined in the {ENV_FILE_NAME} file.")
+        logger.error(f"An error has been detected: 'INVITE_LINK' is not set. {VERIFY_MSG}")
         raise ValueError(AUTO_SHUTDOWN_MSG)
 
     return raw_invite_link
@@ -71,7 +62,7 @@ def check_and_convert_link(raw_invite_link: str, logger: Logger) -> str:
 
 def check_and_convert_token(raw_bot_token: str, logger: Logger) -> str:
     if raw_bot_token == BOT_TOKEN_DEFAULT:
-        logger.error(f"'DISCORD_BOT_TOKEN' is not set and it's needed to launch the bot, please verify that it is correctly defined in the {ENV_FILE_NAME} file.")
+        logger.error(f"An error has been detected: 'DISCORD_BOT_TOKEN' is not set and it's needed to launch the bot. {VERIFY_MSG}")
         raise ValueError(AUTO_SHUTDOWN_MSG)
 
     return raw_bot_token
@@ -79,14 +70,14 @@ def check_and_convert_token(raw_bot_token: str, logger: Logger) -> str:
 
 def convert_test_guild_id(raw_guild_id: str, logger: Logger) -> int | None:
     if raw_guild_id == BOT_TEST_GUILD_ID:
-        logger.warning(f"'TEST_GUILD_ID' is not set and it's needed to sync commands to a guild on DEVELOPMENT Mode. Please verify that it is correctly defined in the {ENV_FILE_NAME} file.")
+        logger.warning(f"'TEST_GUILD_ID' is not set and it's needed to sync commands to a guild on DEVELOPMENT Mode. {VERIFY_MSG}")
         return None
 
     valid_id = None
     try:
         valid_id = int(raw_guild_id)
     except (ValueError, TypeError):
-        logger.warning(f"Unable to convert 'TEST_GUILD_ID' it's needed to sync commands to a guild on DEVELOPMENT Mode. Please verify that it is correctly defined in the {ENV_FILE_NAME} file.")
+        logger.warning(f"Unable to convert 'TEST_GUILD_ID' it's needed to sync commands to a guild on DEVELOPMENT Mode. {VERIFY_MSG}")
         return None
 
     return valid_id

@@ -24,7 +24,7 @@ class ColourFormatter(logging.Formatter):
         (logging.INFO, "\x1b[34;1m"),
         (logging.WARNING, "\x1b[33;1m"),
         (logging.ERROR, "\x1b[31m"),
-        (logging.CRITICAL, "\x1b[41m"),
+        (logging.CRITICAL, "\x1b[41m")
     ]
 
     FORMATS = {
@@ -57,7 +57,7 @@ def build_logger(base_dir: Path):
     stream_handler = logging.StreamHandler()
     stream_handler.setFormatter(ColourFormatter())
 
-    file_handler = logging.FileHandler(filename=base_dir / "data" / "logs" / "discord.log", encoding="utf-8", mode="w")
+    file_handler = logging.FileHandler(filename=base_dir / "data/logs/discord.log", encoding="utf-8", mode="w")
     file_handler.setFormatter(logging.Formatter("[{asctime}] [{levelname:<8}] {name}: {message}", DATE_FMT, style='{'))
 
     logger = logging.getLogger("grumpy")
