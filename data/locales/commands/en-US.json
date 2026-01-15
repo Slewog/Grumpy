@@ -1,0 +1,10 @@
+{
+    "grab_id": "Get user id",
+    "report_message": "Report to Moderators",
+    "ping_desc": "Check bot latency",
+    "help_desc": "List of available commands",
+    "purge_desc": "Purge a text channel",
+    "del_msg_desc": "Delete a number of message in a text channel",
+    "del_msg_amount_desc": "Message amount to delete",
+    "del_msg_amount": "amount"
+}

@@ -15,11 +15,10 @@
 <br/>
 
 <ins>***Dependecies:***</ins>
->- [Python 3.10 or more](https://www.python.org/downloads/).
+>- [Python 3.12.9<=](https://www.python.org/downloads/).
 >- aiohttp
 >- [discord.py==2.6.4](https://github.com/Rapptz/discord.py).
 >- [python-dotenv](https://github.com/theskumar/python-dotenv).
->- [colorlog==6.10.1](https://github.com/borntyping/python-colorlog).
 
 <br/>
 

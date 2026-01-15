@@ -1,57 +1,73 @@
-import discord
+import platform
 from pathlib import Path
-from typing import Literal
 from logging import Logger
+from os import name as os_name
 from dataclasses import dataclass
+from typing import Any
+
+import discord
 from discord.ext import commands
 
-from src.utils import BOT_VALID_STATUS
-from src.services import build_logging, CommandsTranslator
-from src.configs import build_intents, get_settings, Settings
-from src.bot_events import register_cogs, synchronize_commands
+from .utils import BOT_VALID_STATUS
+from .settings import get_settings, Settings
+from .services.commands_translator import CommandsTranslator
+from .services.logger import build_logger, get_log_level_name
+from .bot_events import load_cogs, synchronize_slash_commands
 
 
 class Grumpy(commands.Bot):
-    def __init__(self, settings: Settings, intents: discord.Intents, logger: Logger) -> None:
+    def __init__(self, logger: Logger, settings: Settings) -> None:
+        intents = discord.Intents.default()
+        intents.message_content = True
+        intents.members = True
+
         self.settings = settings
-        self._logger_level_dict = {
-            "DEBUG": logger.debug,
-            "INFO": logger.info,
-            "WARNING": logger.warning,
-            "ERROR": logger.error
-        }
+        self.logger = logger
 
         super().__init__(
-            command_prefix= commands.when_mentioned_or(settings.command_prefix),
-            intents= intents
+            command_prefix = commands.when_mentioned_or(settings.command_prefix),
+            intents = intents,
+            help_command = None
         )
-        self.log("Grumpy has been initialized.")
+
+    def is_development(self) -> bool:
+        return self.settings.is_dev_mode
+
+    async def get_command_translation(self, locale_str: str, user_locale: discord.Locale) -> str:
+        translation = await self.tree.translator.translate(
+            discord.app_commands.locale_str(locale_str),
+            user_locale,
+            None
+        )
+
+        return translation.partition("\n")[0] if translation is not None else locale_str.partition("\n")[0]
 
     async def setup_hook(self) -> None:
-        await register_cogs(self)
+        await load_cogs(self)
 
     async def on_ready(self) -> None:
-        all_guilds = self.guilds
-        guilds_count = len(all_guilds)
-        is_development = self.is_development()
+        # Tell the type checker that this is a ClientUser.
+        assert isinstance(self.user, discord.ClientUser)
 
-        self.log("Sucessfully logged as %s (CLIENT ID: %s) in %s Guilds.", self.user, self.user.id, guilds_count)
-
-        if is_development:
-            for idx, guild in enumerate(all_guilds, start=1):
-                self.log("Connected on guilds %s/%s (NAME:%s, ID: %s, OWNER: %s, OWNER ID: %s).", idx, guilds_count, guild.name, guild.id, guild.owner, guild.owner_id, level="DEBUG")
+        self.logger.info(f"Successfully logged in as {self.user} in {len(self.guilds)} guilds")
 
         await self.tree.set_translator(CommandsTranslator())
-        self.log("Commands translations system has been loaded.")
+        self.logger.info("The slash command translation service has been successfully loaded.")
 
-        await synchronize_commands(self)
+        is_development = self.is_development()
+
+        if is_development:
+            await synchronize_slash_commands(self)
 
         await self.change_presence(
             activity= discord.Game(name= "Under development" if is_development else self.settings.activity),
             status= discord.Status.dnd if is_development else BOT_VALID_STATUS[self.settings.status]
         )
 
-        self.log("Grumpy is ready to use.")
+        self.logger.info(f"{self.user.name} is ready to use.")
+
+    async def on_disconnect(self) -> None:
+        self.logger.warning("The bot disconnects following a request from its owner or an error that occurred during loading.")
 
     async def on_guild_join(self, guild: discord.Guild) -> None:
         print(f'Joined guild: {guild.name} (ID: {guild.id})')
@@ -60,39 +76,42 @@ class Grumpy(commands.Bot):
         print(f'Removed from guild: {guild.name} (ID: {guild.id})')
 
     async def on_member_join(self, member: discord.Member) -> None:
-        pass
+        print(f"{member.display_name} as joined {member.guild.name}")
 
     async def on_member_remove(self, member: discord.Member) -> None:
+        print(f"{member.display_name} as leaved {member.guild.name}")
+
+    async def on_raw_member_remove(self, payload: discord.RawMemberRemoveEvent):
         pass
 
-    async def on_disconnect(self) -> None:
-        self.log("Bot disconnexion requested by the owner.", level="WARNING")
+    async def on_error(self, event_method: str, /, *args: Any, **kwargs: Any) -> None:
+        await super().on_error(event_method, *args, **kwargs)
 
-    def get_test_guild_id(self) -> int | None:
-        return self.settings.test_guild_id
-
-    def is_development(self) -> bool:
-        return self.settings.is_dev_mode
-
-    def log(self, message: str, *args, level: Literal["DEBUG", "INFO", "WARNING", "ERROR"]="INFO", **kwargs) -> None:
-        self._logger_level_dict[level](message, *args, **kwargs)
+        if event_method == "on_ready":
+            await self.change_presence(status=discord.Status.offline)
+            await self.close()
 
 
 @dataclass(slots=True)
 class GrumpyApp:
-    settings: Settings
+    token: str
     bot: Grumpy
 
     def run(self) -> None:
-        self.bot.run(token=self.settings.token)
+        self.bot.run(token=self.token)
 
 
 def create_bot() -> GrumpyApp:
     base_dir = Path(__file__).resolve().parent.parent
 
-    logger = build_logging(base_dir)
-    settings = get_settings(base_dir=base_dir, logger=logger)
-    intents = build_intents()
+    logger = build_logger(base_dir)
+    token, settings = get_settings(base_dir=base_dir, logger=logger)
 
-    bot = Grumpy(settings, intents, logger)
-    return GrumpyApp(settings= settings, bot= bot)
+    logger.info(f"Log level: {get_log_level_name(logger.getEffectiveLevel())}")
+    logger.info(f"discord.py API version: {discord.__version__}")
+    logger.info(f"Python version: {platform.python_version()}")
+    logger.info(f"Running on: {platform.system()} {platform.release()} ({os_name})")
+    logger.info("-------------------")
+
+    bot = Grumpy(logger, settings)
+    return GrumpyApp(token, bot)

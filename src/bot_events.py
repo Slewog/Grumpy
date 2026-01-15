@@ -2,36 +2,51 @@ from __future__ import annotations
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from src.bot import Grumpy
+    from .bot import Grumpy
 
-from logging import getLogger
-from discord import Object, HTTPException
-
-from src.cogs import Admin , Owner, General
+from .settings import SHUTDOWN_MSG
+from discord import HTTPException, Guild
 
 
-async def register_cogs(bot: Grumpy) -> None:
-    bot.log("Cogs loading will start, there are 3 cogs to load.")
-    await bot.add_cog(Admin(bot))
-    await bot.add_cog(Owner(bot))
-    await bot.add_cog(General(bot))
+async def load_cogs(bot: Grumpy) -> None:
+    cogs_dir = bot.settings.base_dir / "src/cogs"
+    if not cogs_dir.is_dir():
+        bot.logger.error(f"An error has been detected: unable to find the cogs directory. {SHUTDOWN_MSG}")
+        raise FileNotFoundError(f"An error has been detected in cogs loading. {SHUTDOWN_MSG}")
+
+    cogs = [file.name for file in cogs_dir.glob('*.py')]
+    cogs_count = len(cogs)
+
+    for i, cog in enumerate(cogs, start=1):
+        extension = cog[:-3]
+        try:
+            await bot.load_extension(f"src.cogs.{extension}")
+            bot.logger.info(f"Loaded extension {i}/{cogs_count}: '{extension}'")
+        except ModuleNotFoundError as exc:
+            exception = f"{type(exc).__name__}: {exc}"
+            bot.logger.error(f"Failed to load extension '{extension}'\n{exception}")
 
 
-async def synchronize_commands(bot: Grumpy) -> None:
-    test_guild_id = bot.get_test_guild_id()
+async def synchronize_slash_commands(bot: Grumpy) -> None:
+    bot.logger.info("Slash commands synchronization begins. They will be synchronize for a test server")
+
     synced: list = []
+    test_guild_id = bot.settings.test_guild_id
 
-    bot.log("Commands registration is starting.")
+    if test_guild_id is None:
+        bot.logger.warning("Unable to synchronize slash commands for development. The test server ID is not defined in the environment variables file")
+        return
+
+    guild = bot.get_guild(test_guild_id)
+
+    if guild is None:
+        bot.logger.warning(f"Unable to synchronize slash commands for development. I have not been added to the test server (ID:{test_guild_id})")
+
+    assert isinstance(guild, Guild)
 
     try:
-        if bot.is_development() and test_guild_id:
-            guild = Object(id=test_guild_id)
-            bot.tree.copy_global_to(guild=guild)
-            synced = await bot.tree.sync(guild=guild)
-            bot.log("%s slash commands synchronized on the server %s for development.", len(synced), test_guild_id)
-            return
-
-        synced = await bot.tree.sync()
-        bot.log("%s slash commands are synchronized globally (may take some time).", len(synced))
+        bot.tree.copy_global_to(guild=guild)
+        synced = await bot.tree.sync(guild=guild)
+        bot.logger.info(f"{len(synced)} slash commands have been successfully synchronized in the '{guild.name}' server")
     except HTTPException as exc:
-        bot.log("Command synchronization failed: %s.", level="ERROR", exc_info=exc)
+        bot.logger.error("Slash command synchronization failed.", exc_info=exc)
